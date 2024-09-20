@@ -1,6 +1,5 @@
 'use client';
 
-import { Tables } from '@/utils/generated/database.types';
 import {
   Table,
   TableBody,
@@ -12,49 +11,34 @@ import {
 import Link from 'next/link';
 import useSupabaseBrowser from '@/utils/supabase/client';
 import { GridAPI } from '@/queries/grid.api';
-import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
+import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
+import { useUser } from '@/context/UserContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
 
-type UserGridData = Tables<'grids'> & {
-  empty_cells_count?: number;
-};
-interface DataTableProps {
-  data: UserGridData[];
-}
-
-const DataTable: React.FC<DataTableProps> = ({ data }) => {
-  const [gridData, setGridData] = useState<UserGridData[]>(data);
+export default function DataTable() {
   const supabase = useSupabaseBrowser();
+  const { userId } = useUser();
 
-  const fetchEmptyCellsCounts = async () => {
-    const updatedGridData = await Promise.all(
-      gridData.map(async (grid) => {
-        const { count } = await GridAPI.countEmptyCells(supabase, grid.uuid!);
-        return { ...grid, empty_cells_count: count };
-      })
-    );
-    setGridData(updatedGridData as UserGridData[]);
-  };
-
-  useEffect(() => {
-    fetchEmptyCellsCounts();
-  });
+  const { data: gridData, refetch } = useQuery(
+    GridAPI.getAll(supabase, userId)
+  );
 
   const handleDelete = async (id: string) => {
     const { error } = await GridAPI.deleteGrid(supabase, id);
     if (error) {
       console.error('Error deleting grid:', error.message);
     } else {
-      setGridData((prevData) => prevData.filter((grid) => grid.uuid !== id));
-      // Refresh empty cell counts after deletion
-      fetchEmptyCellsCounts();
+      refetch();
     }
   };
 
-  return (
+  return gridData && gridData.length > 0 ? (
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead />
           <TableHead>Name</TableHead>
           <TableHead>Columns</TableHead>
           <TableHead>Rows</TableHead>
@@ -68,6 +52,13 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
         {gridData.map((grid) => (
           <TableRow key={grid.id}>
             <TableCell>
+              {grid.assignments_generated ? (
+                <FontAwesomeIcon icon={faLock} className="text-gray-500" />
+              ) : (
+                <FontAwesomeIcon icon={faLockOpen} className="text-gray-500" />
+              )}
+            </TableCell>
+            <TableCell>
               <Link
                 href={`/protected/${grid.uuid}`}
                 className="text-primary hover:underline"
@@ -77,7 +68,7 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
             </TableCell>
             <TableCell>{grid.num_cols}</TableCell>
             <TableCell>{grid.num_rows}</TableCell>
-            <TableCell>{grid.empty_cells_count ?? 'Loading...'}</TableCell>
+            <TableCell>{grid.total_empty_cells}</TableCell>
             <TableCell>
               {grid.created_at
                 ? new Date(grid.created_at).toLocaleString()
@@ -100,7 +91,7 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
         ))}
       </TableBody>
     </Table>
+  ) : (
+    <div>No grids found</div>
   );
-};
-
-export default DataTable;
+}

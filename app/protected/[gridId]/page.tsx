@@ -1,58 +1,61 @@
-// export default function Page({ params }: { params: { gridId: string } }) {
-//   return <div>My Post: {params.gridId}</div>;
-// }
-
 import ClientGrid from '@/components/ClientGrid';
 import { GridProvider } from '@/context/GridContext';
 import { GridAPI } from '@/queries/grid.api';
-import { createClient } from '@/utils/supabase/server';
-import { redirect } from 'next/navigation';
+import { useSupabaseServer } from '@/utils/supabase/server';
+import { prefetchQuery } from '@supabase-cache-helpers/postgrest-react-query';
+import {
+  HydrationBoundary,
+  QueryClient,
+  dehydrate,
+} from '@tanstack/react-query';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ClientWrapper from '@/components/ClientWrapper';
 
 export default async function GridPage({
   params,
 }: {
   params: { gridId: string };
 }) {
-  const supabase = createClient();
+  const queryClient = new QueryClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const supabase = useSupabaseServer();
 
-  if (!user) {
-    return redirect('/sign-in');
-  }
-
-  const { error } = await GridAPI.getOne(supabase, user.id, params.gridId);
-
-  if (error) {
-    return <div>Grid not found {error.message}</div>;
-  }
-
-  const { data: cellsData } = await GridAPI.getGridCells(
-    supabase,
-    params.gridId
-  );
-  const { data: rowAssignments } = await GridAPI.getGridRowAssignments(
-    supabase,
-    params.gridId
-  );
-  const { data: colAssignments } = await GridAPI.getGridColAssignments(
-    supabase,
-    params.gridId
+  await prefetchQuery(
+    queryClient,
+    GridAPI.getGridCells(supabase, params.gridId)
   );
 
-  if (!cellsData) {
-    return <div>Grid not found</div>;
-  }
+  await prefetchQuery(
+    queryClient,
+    GridAPI.getGridInfo(supabase, params.gridId)
+  );
+
+  await prefetchQuery(
+    queryClient,
+    GridAPI.getGridRowAssignments(supabase, params.gridId)
+  );
+
+  await prefetchQuery(
+    queryClient,
+    GridAPI.getGridColAssignments(supabase, params.gridId)
+  );
 
   return (
-    <GridProvider
-      initialData={cellsData ?? []}
-      initialRowAssignments={rowAssignments ?? []}
-      initialColAssignments={colAssignments ?? []}
-    >
-      <ClientGrid />
-    </GridProvider>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <GridProvider gridId={params.gridId}>
+        <ClientWrapper gridId={params.gridId}>
+          <Tabs defaultValue="grid" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="grid">Grid</TabsTrigger>
+              <TabsTrigger value="players">Players</TabsTrigger>
+            </TabsList>
+            <TabsContent value="grid">
+              <ClientGrid />
+            </TabsContent>
+            <TabsContent value="players">Table of players</TabsContent>
+          </Tabs>
+        </ClientWrapper>
+      </GridProvider>
+    </HydrationBoundary>
   );
 }
