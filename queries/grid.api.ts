@@ -9,20 +9,15 @@ export const GridAPI = {
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
   },
+  getGridInfo: (client: TypedSupabaseClient, gridId: string) => {
+    return client.from('grids').select('*').eq('uuid', gridId).single();
+  },
   countEmptyCells: (client: TypedSupabaseClient, gridId: string) => {
     return client
       .from('grid_cells')
       .select('*', { count: 'exact', head: true })
       .eq('grid_id', gridId)
       .is('name', null);
-  },
-  getOne: (client: TypedSupabaseClient, userId: string, gridId: string) => {
-    return client
-      .from('grids')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('uuid', gridId)
-      .single();
   },
   resetAll: (client: TypedSupabaseClient, gridId: string) => {
     return client
