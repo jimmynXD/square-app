@@ -10,6 +10,7 @@ import {
 } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ClientWrapper from '@/components/ClientWrapper';
+import ClientTableWrapper from './client-table-wrapper';
 
 export default async function GridPage({
   params,
@@ -52,7 +53,9 @@ export default async function GridPage({
             <TabsContent value="grid">
               <ClientGrid />
             </TabsContent>
-            <TabsContent value="players">Table of players</TabsContent>
+            <TabsContent value="players">
+              <ClientTableWrapper gridId={params.gridId} />
+            </TabsContent>
           </Tabs>
         </ClientWrapper>
       </GridProvider>
