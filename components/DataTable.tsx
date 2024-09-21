@@ -1,6 +1,5 @@
 'use client';
 
-import { Tables } from '@/utils/generated/database.types';
 import {
   Table,
   TableBody,
@@ -12,49 +11,41 @@ import {
 import Link from 'next/link';
 import useSupabaseBrowser from '@/utils/supabase/client';
 import { GridAPI } from '@/queries/grid.api';
-import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
+import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
+import { useUser } from '@/context/UserContext';
+import { Lock, LockOpen } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-type UserGridData = Tables<'grids'> & {
-  empty_cells_count?: number;
-};
-interface DataTableProps {
-  data: UserGridData[];
-}
-
-const DataTable: React.FC<DataTableProps> = ({ data }) => {
-  const [gridData, setGridData] = useState<UserGridData[]>(data);
+export default function DataTable() {
   const supabase = useSupabaseBrowser();
+  const { userId } = useUser();
+  const { toast } = useToast();
 
-  const fetchEmptyCellsCounts = async () => {
-    const updatedGridData = await Promise.all(
-      gridData.map(async (grid) => {
-        const { count } = await GridAPI.countEmptyCells(supabase, grid.uuid!);
-        return { ...grid, empty_cells_count: count };
-      })
-    );
-    setGridData(updatedGridData as UserGridData[]);
-  };
-
-  useEffect(() => {
-    fetchEmptyCellsCounts();
-  });
+  const { data: gridData, refetch } = useQuery(
+    GridAPI.getAll(supabase, userId)
+  );
 
   const handleDelete = async (id: string) => {
+    const gridName = gridData?.find((grid) => grid.uuid === id)?.name;
     const { error } = await GridAPI.deleteGrid(supabase, id);
     if (error) {
       console.error('Error deleting grid:', error.message);
     } else {
-      setGridData((prevData) => prevData.filter((grid) => grid.uuid !== id));
-      // Refresh empty cell counts after deletion
-      fetchEmptyCellsCounts();
+      refetch();
+      toast({
+        title: `${gridName} deleted`,
+        description: 'The grid has been deleted',
+        variant: 'destructive',
+      });
     }
   };
 
-  return (
+  return gridData && gridData.length > 0 ? (
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead />
           <TableHead>Name</TableHead>
           <TableHead>Columns</TableHead>
           <TableHead>Rows</TableHead>
@@ -68,6 +59,13 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
         {gridData.map((grid) => (
           <TableRow key={grid.id}>
             <TableCell>
+              {grid.assignments_generated ? (
+                <Lock className="w-4 h-4" />
+              ) : (
+                <LockOpen className="w-4 h-4" />
+              )}
+            </TableCell>
+            <TableCell>
               <Link
                 href={`/protected/${grid.uuid}`}
                 className="text-primary hover:underline"
@@ -77,7 +75,7 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
             </TableCell>
             <TableCell>{grid.num_cols}</TableCell>
             <TableCell>{grid.num_rows}</TableCell>
-            <TableCell>{grid.empty_cells_count ?? 'Loading...'}</TableCell>
+            <TableCell>{grid.total_empty_cells}</TableCell>
             <TableCell>
               {grid.created_at
                 ? new Date(grid.created_at).toLocaleString()
@@ -100,7 +98,7 @@ const DataTable: React.FC<DataTableProps> = ({ data }) => {
         ))}
       </TableBody>
     </Table>
+  ) : (
+    <div>No grids found</div>
   );
-};
-
-export default DataTable;
+}

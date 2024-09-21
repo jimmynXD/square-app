@@ -5,11 +5,6 @@ import { useMemo } from 'react';
 
 let client: TypedSupabaseClient | undefined;
 
-// export const createClient = () =>
-//   createBrowserClient(
-//     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-//     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-//   );
 function getSupabaseBrowserClient() {
   if (client) {
     return client;

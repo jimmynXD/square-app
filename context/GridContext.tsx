@@ -5,6 +5,9 @@ import { GridAPI } from '@/queries/grid.api';
 import useSupabaseBrowser from '@/utils/supabase/client';
 import { shuffle } from '@/utils/utils';
 import { Database } from '@/utils/generated/database.types';
+import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
+import { useUser } from './UserContext';
+import { useToast } from '@/hooks/use-toast';
 
 export type GridCell = Database['public']['Tables']['grid_cells']['Row'];
 type RowAssignment =
@@ -22,10 +25,13 @@ interface GridContextType {
   bulkCount: number;
   setBulkCount: React.Dispatch<React.SetStateAction<number>>;
   handleReset: () => Promise<void>;
+  numRows: number;
+  numCols: number;
   rowAssignments: RowAssignment[];
   colAssignments: ColAssignment[];
   handleGenerateAssignments: () => Promise<void>;
-  //   areAssignmentsGenerated: boolean;
+  assignmentsGenerated: boolean;
+  numEmptyCells: number;
 }
 
 // Create the context with the correct type
@@ -33,68 +39,69 @@ const GridContext = createContext<GridContextType | null>(null);
 
 export function GridProvider({
   children,
-  initialData,
-  initialRowAssignments,
-  initialColAssignments,
+  gridId,
 }: {
   children: React.ReactNode;
-  initialData: GridCell[];
-  initialRowAssignments: RowAssignment[];
-  initialColAssignments: ColAssignment[];
+  gridId: string;
 }) {
-  const [gridData, setGridData] = useState<GridCell[]>(initialData);
-  const [name, setName] = useState('');
-  const [bulkCount, setBulkCount] = useState<number>(1);
-  const [rowAssignments, setRowAssignments] = useState<RowAssignment[]>(
-    initialRowAssignments
-  );
-  const [colAssignments, setColAssignments] = useState<ColAssignment[]>(
-    initialColAssignments
+  const supabase = useSupabaseBrowser();
+  const { userId } = useUser();
+  const { toast } = useToast();
+  const { data: allGrids, refetch: refetchAllGrids } = useQuery(
+    GridAPI.getAll(supabase, userId) // Ensure userId is available in the context
   );
 
-  const supabase = useSupabaseBrowser();
+  const { data: gridData, refetch } = useQuery(
+    GridAPI.getGridCells(supabase, gridId)
+  );
+
+  const { data: rowAssignments, refetch: refetchRowAssignments } = useQuery(
+    GridAPI.getGridRowAssignments(supabase, gridId)
+  );
+
+  const { data: colAssignments, refetch: refetchColAssignments } = useQuery(
+    GridAPI.getGridColAssignments(supabase, gridId)
+  );
+
+  const [name, setName] = useState('');
+  const [bulkCount, setBulkCount] = useState<number>(1);
 
   const handleAssign = useCallback(
     async (id: string) => {
       if (!name) return;
 
-      const { error } = await GridAPI.update(
-        supabase,
-        gridData[0].grid_id!,
-        id,
-        name
-      );
-      const { data } = await GridAPI.getGridCells(
-        supabase,
-        gridData[0].grid_id!
-      );
+      const { error } = await GridAPI.update(supabase, gridId, id, name);
 
       if (error) {
         console.error('Error updating cell:', error);
         return;
       }
 
-      if (data) {
-        setGridData(data);
-        setName('');
-      }
+      refetch();
+      refetchAllGrids();
+      setName('');
     },
-    [name, supabase, setGridData, gridData]
+    [name, supabase, gridId, refetch, refetchAllGrids]
   );
   const handleRandomAssign = useCallback(
     async (bulkCount: number = 1) => {
-      const emptyCells = gridData.filter((cell) => !cell.name);
+      const emptyCells = gridData!.filter((cell) => !cell.name);
       if (emptyCells.length === 0) return;
 
       const cellsToAssign = shuffle(emptyCells).slice(0, bulkCount);
       const idsToAssign = cellsToAssign.map((cell) => cell.uuid) as string[];
+      const cellCoordinates = cellsToAssign.map((cell) => ({
+        row: cell.row,
+        col: cell.col,
+      }));
 
       let error;
+
       if (idsToAssign.length === 1) {
         // Single assignment
         ({ error } = await GridAPI.update(
           supabase,
-          gridData[0].grid_id!,
+          gridId,
           idsToAssign[0],
           name
         ));
@@ -102,76 +109,81 @@ export function GridProvider({
         // Bulk assignment
         ({ error } = await GridAPI.updateMany(
           supabase,
-          gridData[0].grid_id!,
+          gridId,
           idsToAssign,
           name
         ));
       }
 
       if (error) {
-        console.error('Error updating cell(s):', error);
+        console.error('Error updating cell(s):', error.message);
         return;
       }
 
-      const { data } = await GridAPI.getGridCells(
-        supabase,
-        gridData[0].grid_id!
-      );
-      if (data) {
-        setGridData(data);
-        setName('');
-      }
+      refetch();
+      refetchAllGrids();
+      setName('');
+      setBulkCount(1);
+      toast({
+        title: `${name} assigned ${bulkCount} cells`,
+        description: `${name} assigned to ${cellCoordinates.map(({ row, col }) => `Row ${row + 1} Col ${col + 1}`).join(', ')}`,
+        variant: 'default',
+      });
     },
-    [gridData, name, supabase]
+    [gridData, name, supabase, gridId, refetch, refetchAllGrids, toast]
   );
 
   const handleDelete = useCallback(
     async (id: string) => {
-      const { error } = await GridAPI.update(
-        supabase,
-        gridData[0].grid_id!,
-        id,
-        null
-      );
-
-      const { data } = await GridAPI.getGridCells(
-        supabase,
-        gridData[0].grid_id!
-      );
-
+      const { error } = await GridAPI.update(supabase, gridId, id, null);
+      const cellInfo = gridData?.find((cell) => cell.uuid === id);
       if (error) {
         console.error('Error deleting cell:', error);
         return;
       }
 
-      if (data) {
-        setGridData(data);
-      }
+      refetch();
+      refetchAllGrids();
+      toast({
+        title: `${cellInfo?.name} deleted`,
+        description: `Row: ${(cellInfo?.row || 0) + 1} Col: ${(cellInfo?.col || 0) + 1}`,
+        variant: 'destructive',
+      });
     },
-    [supabase, gridData, setGridData]
+    [supabase, gridId, refetch, refetchAllGrids, toast, gridData]
   );
 
   const handleReset = useCallback(async () => {
-    const { error } = await GridAPI.resetAll(supabase, gridData[0].grid_id!);
+    const { error } = await GridAPI.resetAll(supabase, gridId);
     if (error) {
       console.error('Error resetting grid:', error);
       return;
     }
 
-    const { data } = await GridAPI.getGridCells(supabase, gridData[0].grid_id!);
-
-    if (data) {
-      setGridData(data);
-      setBulkCount(1);
-      setName('');
-    }
-  }, [supabase, gridData, setGridData, setBulkCount, setName]);
+    refetch();
+    refetchAllGrids();
+    setBulkCount(1);
+    setName('');
+    toast({
+      title: 'Grid reset',
+      description: 'All cells have been reset',
+      variant: 'default',
+    });
+  }, [
+    supabase,
+    gridId,
+    refetch,
+    refetchAllGrids,
+    setBulkCount,
+    setName,
+    toast,
+  ]);
 
   const handleGenerateAssignments = useCallback(async () => {
     const { error: rowError } = await GridAPI.createGridRowAssignments(
       supabase,
-      gridData[0].grid_id!,
-      10
+      gridId,
+      allGrids?.find((grid) => grid.uuid === gridId)?.num_rows || 10
     );
 
     if (rowError) {
@@ -181,8 +193,8 @@ export function GridProvider({
 
     const { error: colError } = await GridAPI.createGridColAssignments(
       supabase,
-      gridData[0].grid_id!,
-      10
+      gridId,
+      allGrids?.find((grid) => grid.uuid === gridId)?.num_rows || 10
     );
 
     if (colError) {
@@ -190,24 +202,25 @@ export function GridProvider({
       return;
     }
 
-    const { data: rowData } = await GridAPI.getGridRowAssignments(
-      supabase,
-      gridData[0].grid_id!
-    );
-
-    const { data: colData } = await GridAPI.getGridColAssignments(
-      supabase,
-      gridData[0].grid_id!
-    );
-
-    if (rowData && colData) {
-      setRowAssignments(rowData);
-      setColAssignments(colData);
-    }
-  }, [supabase, gridData]);
-
+    refetchRowAssignments();
+    refetchColAssignments();
+    refetchAllGrids();
+    toast({
+      title: 'Assignments generated',
+      description: 'Grid is now locked!',
+      variant: 'default',
+    });
+  }, [
+    supabase,
+    gridId,
+    refetchRowAssignments,
+    refetchColAssignments,
+    refetchAllGrids,
+    allGrids,
+    toast,
+  ]);
   const contextValue: GridContextType = {
-    gridData,
+    gridData: gridData ?? [],
     name,
     setName,
     bulkCount,
@@ -216,9 +229,17 @@ export function GridProvider({
     handleRandomAssign,
     handleDelete,
     handleReset,
-    rowAssignments,
-    colAssignments,
+    numRows: allGrids?.find((grid) => grid.uuid === gridId)?.num_rows || 10,
+    numCols: allGrids?.find((grid) => grid.uuid === gridId)?.num_cols || 10,
+    rowAssignments: rowAssignments ?? [],
+    colAssignments: colAssignments ?? [],
     handleGenerateAssignments,
+    assignmentsGenerated:
+      allGrids?.some(
+        (grid) => grid.uuid === gridId && grid.assignments_generated
+      ) ?? false,
+    numEmptyCells:
+      allGrids?.find((grid) => grid.uuid === gridId)?.total_empty_cells || 0,
   };
 
   return (
