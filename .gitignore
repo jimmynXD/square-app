@@ -10,7 +10,7 @@
 /coverage
 
 # next.js
-/.next/
+**/.next/
 /out/
 
 # production
@@ -36,5 +36,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 **/generated
-supabase/
-!utils/supabase/
+frontend/supabase/
+!frontend/utils/supabase/
