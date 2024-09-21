@@ -8,8 +8,7 @@ import { Card, CardContent, CardFooter } from './ui/card';
 import clsx from 'clsx';
 import { Skeleton } from './ui/skeleton';
 import { Fragment } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLock } from '@fortawesome/free-solid-svg-icons';
+import { Lock } from 'lucide-react';
 
 export default function ClientGrid() {
   const {
@@ -95,7 +94,7 @@ export default function ClientGrid() {
           disabled={rowAssignments.length > 0 && colAssignments.length > 0}
         >
           {assignmentsGenerated ? (
-            <FontAwesomeIcon icon={faLock} className="text-gray-500" />
+            <Lock className="w-4 h-4" />
           ) : (
             'Generate Assignments'
           )}
