@@ -18,6 +18,7 @@ import { useUser } from '@/context/UserContext';
 import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import LoadingOverlay from './LoadingOverlay';
 
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 export function CreateGridSheet() {
   const [open, setOpen] = useState(false);
   const [gridName, setGridName] = useState('');
@@ -79,7 +80,7 @@ export function CreateGridSheet() {
           <SheetHeader>
             <SheetTitle>Create New Grid</SheetTitle>
           </SheetHeader>
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <form onSubmit={handleSubmit} className="space-y-8 mt-4">
             <div>
               <Label htmlFor="gridName">Grid Name</Label>
               <Input
@@ -89,27 +90,49 @@ export function CreateGridSheet() {
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="numCols">Number of Columns</Label>
-              <Input
-                id="numCols"
-                type="number"
-                value={numCols}
-                onChange={(e) => setNumCols(Number(e.target.value))}
-                required
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="numCols">Columns</Label>
+                <ToggleGroup
+                  variant="outline"
+                  type="single"
+                  value={String(numCols)}
+                  onValueChange={(value) => {
+                    if (value) setNumCols(Number(value));
+                  }}
+                  className="justify-start"
+                >
+                  <ToggleGroupItem value="10" aria-label="Toggle bold">
+                    <span className="text-sm w-4 h-4 leading-none">10</span>
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="5" aria-label="Toggle italic">
+                    <span className="text-sm w-4 h-4 leading-none">5</span>
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+              <div>
+                <Label htmlFor="numRows">Rows</Label>
+                <ToggleGroup
+                  variant="outline"
+                  type="single"
+                  value={String(numRows)}
+                  onValueChange={(value) => {
+                    if (value) setNumRows(Number(value));
+                  }}
+                  className="justify-start"
+                >
+                  <ToggleGroupItem value="10" aria-label="Toggle bold">
+                    <span className="text-sm w-4 h-4 leading-none">10</span>
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="5" aria-label="Toggle italic">
+                    <span className="text-sm w-4 h-4 leading-none">5</span>
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="numRows">Number of Rows</Label>
-              <Input
-                id="numRows"
-                type="number"
-                value={numRows}
-                onChange={(e) => setNumRows(Number(e.target.value))}
-                required
-              />
-            </div>
-            <Button type="submit">Create Grid</Button>
+            <Button className="w-full" type="submit">
+              Create Grid
+            </Button>
           </form>
         </SheetContent>
       </Sheet>

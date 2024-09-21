@@ -14,23 +14,30 @@ import { GridAPI } from '@/queries/grid.api';
 import { Button } from './ui/button';
 import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import { useUser } from '@/context/UserContext';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
+import { Lock, LockOpen } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DataTable() {
   const supabase = useSupabaseBrowser();
   const { userId } = useUser();
+  const { toast } = useToast();
 
   const { data: gridData, refetch } = useQuery(
     GridAPI.getAll(supabase, userId)
   );
 
   const handleDelete = async (id: string) => {
+    const gridName = gridData?.find((grid) => grid.uuid === id)?.name;
     const { error } = await GridAPI.deleteGrid(supabase, id);
     if (error) {
       console.error('Error deleting grid:', error.message);
     } else {
       refetch();
+      toast({
+        title: `${gridName} deleted`,
+        description: 'The grid has been deleted',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -53,9 +60,9 @@ export default function DataTable() {
           <TableRow key={grid.id}>
             <TableCell>
               {grid.assignments_generated ? (
-                <FontAwesomeIcon icon={faLock} className="text-gray-500" />
+                <Lock className="w-4 h-4" />
               ) : (
-                <FontAwesomeIcon icon={faLockOpen} className="text-gray-500" />
+                <LockOpen className="w-4 h-4" />
               )}
             </TableCell>
             <TableCell>
