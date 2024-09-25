@@ -44,3 +44,6 @@ backend/supabase/
 !frontend/utils/supabase/
 
 tmp/
+
+# testing
+**/coverage
