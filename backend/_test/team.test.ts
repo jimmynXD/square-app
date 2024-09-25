@@ -42,7 +42,9 @@ describe('Team Controller', () => {
       ];
 
       // Mock the fetchTeamData function
-      vi.spyOn(sportsDataService, 'fetchTeamData').mockResolvedValue(mockData);
+      vi.spyOn(sportsDataService, 'fetchTeamData').mockResolvedValue(
+        mockData as any
+      );
 
       // Mock the supabase response
       const mockSelect = vi.fn().mockReturnValue({

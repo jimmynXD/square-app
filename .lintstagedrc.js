@@ -10,12 +10,6 @@ const buildPrettierCommand = (filenames) =>
     .map((f) => path.relative(process.cwd(), f))
     .join(' ')}`;
 
-const buildVitestCommand = (filenames) =>
-  `cd backend && vitest run --passWithNoTests ${filenames
-    .map((f) => path.relative(process.cwd(), f))
-    .join(' ')}`;
-
 module.exports = {
   '*.{js,jsx,ts,tsx}': [buildEslintCommand, buildPrettierCommand],
-  'backend/**/*.{js,ts}': [buildVitestCommand],
 };

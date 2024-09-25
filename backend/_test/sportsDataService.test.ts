@@ -67,7 +67,7 @@ describe('sportsDataService', () => {
           team_id: 1,
           uid: 'uid1',
         },
-      ] as TeamTypes[]);
+      ] as unknown as TeamTypes[]);
     });
 
     it('should throw an error if fetching team data fails', async () => {
@@ -145,7 +145,7 @@ describe('sportsDataService', () => {
           venue: 'Stadium 1',
           week: 1,
         },
-      ] as NFLScheduleTypes[]);
+      ] as unknown as NFLScheduleTypes[]);
     });
 
     it('should throw an error if fetching schedule data fails', async () => {

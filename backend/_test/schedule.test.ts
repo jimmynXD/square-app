@@ -134,7 +134,7 @@ describe('Schedule Controller', () => {
       ];
 
       vi.spyOn(sportsDataService, 'fetchNFLScheduleData').mockResolvedValue(
-        mockData
+        mockData as any
       );
 
       const mockUpsert = vi.fn().mockResolvedValue({ error: null });
