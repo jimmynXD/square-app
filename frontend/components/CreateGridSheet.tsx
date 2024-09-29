@@ -17,20 +17,35 @@ import useSupabaseBrowser from '@/utils/supabase/client';
 import { useUser } from '@/context/UserContext';
 import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import LoadingOverlay from './LoadingOverlay';
-
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Database } from '@/utils/generated/database.types';
+import { formattedDate } from '@/utils/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectGroup,
+  SelectLabel,
+} from '@/components/ui/select';
+
+export type ScheduleTypes = Database['public']['Tables']['nfl_schedule']['Row'];
+
 export function CreateGridSheet() {
   const [open, setOpen] = useState(false);
   const [gridName, setGridName] = useState('');
   const [numCols, setNumCols] = useState(10);
   const [numRows, setNumRows] = useState(10);
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
+  const [event, setEvent] = useState('');
 
   const router = useRouter();
   const supabase = useSupabaseBrowser();
   const { userId } = useUser();
 
   const { refetch } = useQuery(GridAPI.getAll(supabase, userId));
+  const { data: schedule } = useQuery(GridAPI.getSchedule(supabase));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +54,8 @@ export function CreateGridSheet() {
       userId,
       gridName,
       numCols,
-      numRows
+      numRows,
+      event
     );
 
     if (error) {
@@ -129,6 +145,46 @@ export function CreateGridSheet() {
                   </ToggleGroupItem>
                 </ToggleGroup>
               </div>
+            </div>
+            <div>
+              <Select onValueChange={(value) => setEvent(value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a game" />
+                </SelectTrigger>
+                <SelectContent>
+                  {schedule &&
+                    Object.entries(
+                      schedule.reduce(
+                        (acc, game) => {
+                          const week = game.week
+                            ? `Week ${game.week}`
+                            : 'Regular Season';
+                          if (!acc[week]) acc[week] = [];
+                          acc[week].push(game);
+                          return acc;
+                        },
+                        {} as Record<string, ScheduleTypes[]>
+                      )
+                    ).map(([week, games]) => (
+                      <SelectGroup key={week}>
+                        <SelectLabel>{week}</SelectLabel>
+                        {games.map((game) => {
+                          // show date as SEP 10 @ 10:00AM
+                          const date = new Date(game.date);
+
+                          return (
+                            <SelectItem
+                              key={game.event_id}
+                              value={game.event_id}
+                            >
+                              {game.short_name} | {formattedDate(date)}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectGroup>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button className="w-full" type="submit">
               Create Grid

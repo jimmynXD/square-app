@@ -42,7 +42,6 @@ export default function ClientGrid() {
     9: 'grid-cols-[2rem_repeat(9,7rem)]',
     10: 'grid-cols-[2rem_repeat(10,7rem)]',
   };
-  console.log(numEmptyCells);
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 items-end">
