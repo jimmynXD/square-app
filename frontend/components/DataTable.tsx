@@ -16,6 +16,7 @@ import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import { useUser } from '@/context/UserContext';
 import { Lock, LockOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { formattedDate } from '@/utils/utils';
 
 export default function DataTable() {
   const supabase = useSupabaseBrowser();
@@ -50,8 +51,10 @@ export default function DataTable() {
           <TableHead>Columns</TableHead>
           <TableHead>Rows</TableHead>
           <TableHead>Empty cells</TableHead>
-          <TableHead>Created At</TableHead>
-          <TableHead>Updated At</TableHead>
+          <TableHead>Game</TableHead>
+          <TableHead>Date</TableHead>
+          {/* <TableHead>Created At</TableHead>
+          <TableHead>Updated At</TableHead> */}
           <TableHead>Delete</TableHead>
         </TableRow>
       </TableHeader>
@@ -76,7 +79,13 @@ export default function DataTable() {
             <TableCell>{grid.num_cols}</TableCell>
             <TableCell>{grid.num_rows}</TableCell>
             <TableCell>{grid.total_empty_cells}</TableCell>
+            <TableCell>{grid.nfl_schedule?.short_name}</TableCell>
             <TableCell>
+              {grid.nfl_schedule?.date
+                ? formattedDate(new Date(grid.nfl_schedule?.date))
+                : ''}
+            </TableCell>
+            {/* <TableCell>
               {grid.created_at
                 ? new Date(grid.created_at).toLocaleString()
                 : 'N/A'}
@@ -85,7 +94,7 @@ export default function DataTable() {
               {grid.updated_at
                 ? new Date(grid.updated_at).toLocaleString()
                 : 'N/A'}
-            </TableCell>
+            </TableCell> */}
             <TableCell>
               <Button
                 variant={'destructive'}
