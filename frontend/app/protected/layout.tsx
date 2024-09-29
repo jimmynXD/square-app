@@ -27,6 +27,7 @@ export default async function ProtectedLayout({
   }
 
   await prefetchQuery(queryClient, GridAPI.getAll(supabase, user.id));
+  await prefetchQuery(queryClient, GridAPI.getSchedule(supabase));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
