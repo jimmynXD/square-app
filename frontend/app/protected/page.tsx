@@ -1,5 +1,5 @@
-import { CreateGridSheet } from '@/components/CreateGridSheet';
-import DataTable from '@/components/DataTable';
+import CreateGridSheet from './create-grid-sheet';
+import GridDataTable from './grid-data-table';
 
 export default async function ProtectedPage() {
   return (
@@ -8,7 +8,7 @@ export default async function ProtectedPage() {
       <div className="mb-4">
         <CreateGridSheet />
       </div>
-      <DataTable />
+      <GridDataTable />
     </div>
   );
 }

@@ -7,35 +7,34 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from './ui/table';
+} from '@/components/ui/table';
 import Link from 'next/link';
 import useSupabaseBrowser from '@/utils/supabase/client';
 import { GridAPI } from '@/queries/grid.api';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import { useUser } from '@/context/UserContext';
 import { Lock, LockOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formattedDate } from '@/utils/utils';
 
-export default function DataTable() {
+export default function GridDataTable() {
   const supabase = useSupabaseBrowser();
   const { userId } = useUser();
   const { toast } = useToast();
 
   const { data: gridData, refetch } = useQuery(
-    GridAPI.getAll(supabase, userId)
+    GridAPI.v0.getManyGrids(supabase, userId)
   );
 
-  const handleDelete = async (id: string) => {
-    const gridName = gridData?.find((grid) => grid.uuid === id)?.name;
-    const { error } = await GridAPI.deleteGrid(supabase, id);
+  const handleDelete = async (id: string, name: string) => {
+    const { error } = await GridAPI.v0.deleteGrid(supabase, id);
     if (error) {
       console.error('Error deleting grid:', error.message);
     } else {
       refetch();
       toast({
-        title: `${gridName} deleted`,
+        title: `${name} deleted`,
         description: 'The grid has been deleted',
         variant: 'destructive',
       });
@@ -98,7 +97,7 @@ export default function DataTable() {
             <TableCell>
               <Button
                 variant={'destructive'}
-                onClick={() => handleDelete(grid.uuid!)}
+                onClick={() => handleDelete(grid.uuid!, grid.name!)}
               >
                 Delete
               </Button>

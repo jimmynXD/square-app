@@ -44,7 +44,7 @@ describe('Schedule Controller', () => {
 
       vi.spyOn(supabase, 'from').mockImplementation(() => mockSelect());
 
-      const response = await request(app).get('/api/schedule');
+      const response = await request(app).get('/v0/api/schedule');
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockData);
@@ -95,7 +95,9 @@ describe('Schedule Controller', () => {
         return null;
       });
 
-      const response = await request(app).get(`/api/schedule/${abbreviation}`);
+      const response = await request(app).get(
+        `/v0/api/schedule/${abbreviation}`
+      );
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockSchedule);
@@ -142,7 +144,7 @@ describe('Schedule Controller', () => {
         upsert: mockUpsert,
       } as any);
 
-      const response = await request(app).put('/api/schedule/update');
+      const response = await request(app).put('/v0/api/schedule/update');
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({

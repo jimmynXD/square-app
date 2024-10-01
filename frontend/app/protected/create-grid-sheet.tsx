@@ -1,24 +1,23 @@
 'use client';
 
-import { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
+import { useCallback, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from './ui/sheet';
+} from '@/components/ui/sheet';
 import { GridAPI } from '@/queries/grid.api';
 import { useRouter } from 'next/navigation';
 import useSupabaseBrowser from '@/utils/supabase/client';
 import { useUser } from '@/context/UserContext';
 import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
-import LoadingOverlay from './LoadingOverlay';
+import LoadingOverlay from '@/components/LoadingOverlay';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Database } from '@/utils/generated/database.types';
 import { formattedDate } from '@/utils/utils';
 import {
   Select,
@@ -29,10 +28,9 @@ import {
   SelectGroup,
   SelectLabel,
 } from '@/components/ui/select';
+import { ScheduleTypes } from '@/utils/types';
 
-export type ScheduleTypes = Database['public']['Tables']['nfl_schedule']['Row'];
-
-export function CreateGridSheet() {
+export default function CreateGridSheet() {
   const [open, setOpen] = useState(false);
   const [gridName, setGridName] = useState('');
   const [numCols, setNumCols] = useState(10);
@@ -44,12 +42,14 @@ export function CreateGridSheet() {
   const supabase = useSupabaseBrowser();
   const { userId } = useUser();
 
-  const { refetch } = useQuery(GridAPI.getAll(supabase, userId));
-  const { data: schedule } = useQuery(GridAPI.getSchedule(supabase));
+  const { refetch } = useQuery(GridAPI.v0.getManyGrids(supabase, userId));
+  const { data: scheduleData } = useQuery(
+    GridAPI.v0.getUpcomingSchedules(supabase)
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data, error } = await GridAPI.addGrid(
+    const { data, error } = await GridAPI.v0.createGrid(
       supabase,
       userId,
       gridName,
@@ -66,7 +66,7 @@ export function CreateGridSheet() {
 
     const newGridId = data.uuid;
 
-    const { error: cellsError } = await GridAPI.createGridCells(
+    const { error: cellsError } = await GridAPI.v0.createManyCells(
       supabase,
       newGridId!,
       numCols,
@@ -78,6 +78,7 @@ export function CreateGridSheet() {
       setLoading(false); // Reset loading state
       return;
     }
+
     setOpen(false);
     setLoading(true); // Set loading to true when form is submitted
     refetch();
@@ -85,6 +86,9 @@ export function CreateGridSheet() {
     router.push(`/protected/${newGridId}`);
   };
 
+  const handleEventChange = useCallback((value: string) => {
+    setEvent(value);
+  }, []);
   return (
     <>
       <LoadingOverlay isLoading={loading} />
@@ -92,7 +96,7 @@ export function CreateGridSheet() {
         <SheetTrigger asChild>
           <Button>Create New Grid</Button>
         </SheetTrigger>
-        <SheetContent>
+        <SheetContent aria-describedby="create-grid-description">
           <SheetHeader>
             <SheetTitle>Create New Grid</SheetTitle>
           </SheetHeader>
@@ -147,14 +151,14 @@ export function CreateGridSheet() {
               </div>
             </div>
             <div>
-              <Select onValueChange={(value) => setEvent(value)}>
+              <Select onValueChange={handleEventChange}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a game" />
                 </SelectTrigger>
                 <SelectContent>
-                  {schedule &&
+                  {scheduleData &&
                     Object.entries(
-                      schedule.reduce(
+                      scheduleData.reduce(
                         (acc, game) => {
                           const week = game.week
                             ? `Week ${game.week}`
@@ -169,7 +173,6 @@ export function CreateGridSheet() {
                       <SelectGroup key={week}>
                         <SelectLabel>{week}</SelectLabel>
                         {games.map((game) => {
-                          // show date as SEP 10 @ 10:00AM
                           const date = new Date(game.date);
 
                           return (

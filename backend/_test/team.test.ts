@@ -55,7 +55,7 @@ describe('Team Controller', () => {
 
       vi.spyOn(supabase, 'from').mockImplementation(() => mockSelect());
 
-      const response = await request(app).get('/api/team');
+      const response = await request(app).get('/v0/api/team');
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockData);
@@ -92,7 +92,7 @@ describe('Team Controller', () => {
 
       vi.spyOn(supabase, 'from').mockImplementation(() => mockSelect());
 
-      const response = await request(app).get(`/api/team/${abbreviation}`);
+      const response = await request(app).get(`/v0/api/team/${abbreviation}`);
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockTeam);
@@ -146,7 +146,7 @@ describe('Team Controller', () => {
         upsert: mockUpsert,
       } as any);
 
-      const response = await request(app).put('/api/team/update');
+      const response = await request(app).put('/v0/api/team/update');
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({

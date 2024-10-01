@@ -1,22 +1,13 @@
 'use client';
-import { GridAPI } from '@/queries/grid.api';
-import useSupabaseBrowser from '@/utils/supabase/client';
+import { useGridContext } from '@/context/GridContext';
 import { formattedDate } from '@/utils/utils';
-import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 
 export default function ClientWrapper({
   children,
-  gridId,
 }: {
   children: React.ReactNode;
-  gridId: string;
 }) {
-  const supabase = useSupabaseBrowser();
-  const { data: gridInfo, error } = useQuery(
-    GridAPI.getGridInfo(supabase, gridId)
-  );
-
-  if (error) return null;
+  const { gridInfo } = useGridContext();
   return (
     <div className="flex-1 space-y-4 xl:max-w-7xl xl:mx-auto p-8">
       <div className="flex items-center justify-between space-y-2">

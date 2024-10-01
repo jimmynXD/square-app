@@ -9,9 +9,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/team', teamRoutes);
-app.use('/api/schedule', scheduleRoutes);
-app.use('/api/score', scoreRoutes);
+app.use('/v0/api/team', teamRoutes);
+app.use('/v0/api/schedule', scheduleRoutes);
+app.use('/v0/api/score', scoreRoutes);
 app.use(errorHandler);
 
 export default app;

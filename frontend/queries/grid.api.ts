@@ -1,6 +1,6 @@
 import { TablesInsert, TablesUpdate } from '@/utils/generated/database.types';
 import { TypedSupabaseClient } from '@/utils/types';
-import { getCurrentISODate } from '@/utils/utils';
+import { getISODateShort } from '@/utils/utils';
 
 export const GridAPI = {
   getAll: (client: TypedSupabaseClient, userId: string) => {
@@ -151,7 +151,7 @@ export const GridAPI = {
       .order('col', { ascending: true });
   },
   getSchedule: (client: TypedSupabaseClient) => {
-    const currentDate = getCurrentISODate();
+    const currentDate = getISODateShort();
     return client
       .from('nfl_schedule')
       .select('*')
@@ -183,13 +183,52 @@ export const GridAPI = {
         .single()
     );
   },
-  v2: {
-    getCellAssignments: (client: TypedSupabaseClient, gridId: number) => {
+  v0: {
+    getManyGrids: (client: TypedSupabaseClient, userId: string) => {
+      return client
+        .from('grids')
+        .select('*, nfl_schedule(*)')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+    },
+    getGrid: (client: TypedSupabaseClient, gridId: string) => {
+      return client
+        .from('grids')
+        .select('*, nfl_schedule(*)')
+        .eq('uuid', gridId)
+        .single();
+    },
+    getManyCells: (client: TypedSupabaseClient, gridId: string) => {
       return client.from('cell_assignments').select('*').eq('grid_id', gridId);
     },
-    createCellAssignments: (
+    getUpcomingSchedules: (client: TypedSupabaseClient) => {
+      const currentDate = getISODateShort();
+      return client
+        .from('nfl_schedule')
+        .select('*')
+        .gte('date', currentDate)
+        .order('date', { ascending: true });
+    },
+    createGrid: (
       client: TypedSupabaseClient,
-      gridId: number,
+      userId: string,
+      gridName: string,
+      numCols: number = 10,
+      numRows: number = 10,
+      eventId: string
+    ) => {
+      const insertData: TablesInsert<'grids'> = {
+        user_id: userId,
+        name: gridName,
+        num_cols: numCols,
+        num_rows: numRows,
+        event_id: eventId,
+      };
+      return client.from('grids').insert(insertData).select().single();
+    },
+    createManyCells: (
+      client: TypedSupabaseClient,
+      gridId: string,
       numCols: number,
       numRows: number
     ) => {
@@ -215,19 +254,39 @@ export const GridAPI = {
       }
       return client.from('cell_assignments').insert(cellsToInsert);
     },
-    updateCellAssignment: (
+    updateCell: (
       client: TypedSupabaseClient,
-      gridId: number,
-      rowIndex: number,
-      colIndex: number,
-      assignedValue: string
+      gridId: string,
+      cellId: number,
+      assignedValue: string | null
     ) => {
       return client
         .from('cell_assignments')
         .update({ assigned_value: assignedValue })
         .eq('grid_id', gridId)
-        .eq('row_index', rowIndex)
-        .eq('col_index', colIndex);
+        .eq('id', cellId);
+    },
+    updateManyCells: (
+      client: TypedSupabaseClient,
+      gridId: string,
+      cellIds: number[],
+      assigned_value: string | null
+    ) => {
+      const updatedData: TablesUpdate<'cell_assignments'> = { assigned_value };
+      return client
+        .from('cell_assignments')
+        .update(updatedData)
+        .eq('grid_id', gridId)
+        .in('id', cellIds);
+    },
+    deleteGrid: (client: TypedSupabaseClient, gridId: string) => {
+      return client.from('grids').delete().eq('uuid', gridId);
+    },
+    resetManyCells: (client: TypedSupabaseClient, gridId: string) => {
+      return client
+        .from('cell_assignments')
+        .update({ assigned_value: null })
+        .eq('grid_id', gridId);
     },
   },
 };

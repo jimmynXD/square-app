@@ -1,4 +1,3 @@
-import ClientGrid from '@/components/ClientGrid';
 import { GridProvider } from '@/context/GridContext';
 import { GridAPI } from '@/queries/grid.api';
 import { useSupabaseServer } from '@/utils/supabase/server';
@@ -9,8 +8,10 @@ import {
   dehydrate,
 } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ClientWrapper from '@/components/ClientWrapper';
 import ClientTableWrapper from './client-table-wrapper';
+import ClientGrid from './client-grid';
+import UpdateCellDrawer from './update-cell-drawer';
+import ClientWrapper from './client-wrapper';
 
 export default async function GridPage({
   params,
@@ -21,40 +22,30 @@ export default async function GridPage({
 
   const supabase = useSupabaseServer();
 
-  await prefetchQuery(
-    queryClient,
-    GridAPI.getGridCells(supabase, params.gridId)
-  );
+  await prefetchQuery(queryClient, GridAPI.v0.getGrid(supabase, params.gridId));
 
   await prefetchQuery(
     queryClient,
-    GridAPI.getGridInfo(supabase, params.gridId)
-  );
-
-  await prefetchQuery(
-    queryClient,
-    GridAPI.getGridRowAssignments(supabase, params.gridId)
-  );
-
-  await prefetchQuery(
-    queryClient,
-    GridAPI.getGridColAssignments(supabase, params.gridId)
+    GridAPI.v0.getManyCells(supabase, params.gridId)
   );
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <GridProvider gridId={params.gridId}>
-        <ClientWrapper gridId={params.gridId}>
+        <ClientWrapper>
           <Tabs defaultValue="grid" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="grid">Grid</TabsTrigger>
-              <TabsTrigger value="players">Players</TabsTrigger>
-            </TabsList>
+            <div className="flex justify-between">
+              <TabsList>
+                <TabsTrigger value="grid">Grid</TabsTrigger>
+                <TabsTrigger value="players">Players</TabsTrigger>
+              </TabsList>
+              <UpdateCellDrawer />
+            </div>
             <TabsContent value="grid">
               <ClientGrid />
             </TabsContent>
             <TabsContent value="players">
-              <ClientTableWrapper gridId={params.gridId} />
+              <ClientTableWrapper />
             </TabsContent>
           </Tabs>
         </ClientWrapper>

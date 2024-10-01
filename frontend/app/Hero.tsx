@@ -1,4 +1,4 @@
-export default function Header() {
+export default function Hero() {
   return (
     <div className="flex-grow flex flex-col justify-center items-center">
       <div className="w-full p-[1px] bg-gradient-to-r from-transparent via-foreground/10 to-transparent my-8" />
