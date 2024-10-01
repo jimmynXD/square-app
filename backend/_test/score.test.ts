@@ -60,7 +60,7 @@ describe('Score Controller', () => {
 
       vi.spyOn(supabase, 'from').mockImplementation(() => mockSelect());
 
-      const response = await request(app).get('/api/score');
+      const response = await request(app).get('/v0/api/score');
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockData);
@@ -102,7 +102,7 @@ describe('Score Controller', () => {
 
       vi.spyOn(supabase, 'from').mockImplementation(() => mockSelect());
 
-      const response = await request(app).get(`/api/score/${eventId}`);
+      const response = await request(app).get(`/v0/api/score/${eventId}`);
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockGame);
@@ -164,7 +164,7 @@ describe('Score Controller', () => {
         upsert: mockUpsert,
       } as any);
 
-      const response = await request(app).put('/api/score/update');
+      const response = await request(app).put('/v0/api/score/update');
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
