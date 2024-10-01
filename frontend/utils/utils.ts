@@ -24,25 +24,20 @@ export function shuffle<T>(array: T[]): T[] {
   return newArray;
 }
 
-export function getCurrentISODate(): string {
-  const now = new Date();
-  const year = now.getUTCFullYear();
-  const month = String(now.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(now.getUTCDate()).padStart(2, '0');
-  const hours = String(now.getUTCHours()).padStart(2, '0');
-  const minutes = String(now.getUTCMinutes()).padStart(2, '0');
-  const seconds = String(now.getUTCSeconds()).padStart(2, '0');
-
-  // it should look like 2024-12-17T01:30:00
-  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+export function getISODateShort(): string {
+  const currentDate = new Date().toISOString().split('.')[0] + 'Z';
+  return currentDate;
 }
 
 export const formattedDate = (date: Date) => {
   return date.toLocaleDateString('en-US', {
+    weekday: 'short',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: 'numeric',
     hour12: true,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZoneName: 'short',
   });
 };
