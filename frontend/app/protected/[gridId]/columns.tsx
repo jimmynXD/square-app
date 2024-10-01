@@ -1,6 +1,6 @@
 'use client';
 
-import { GridCell, useGridContext } from '@/context/GridContext';
+import { useGridContext } from '@/context/GridContext';
 import { ColumnDef, Row } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 
@@ -11,9 +11,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { CellTypes } from '@/utils/types';
 
-const ActionCell = ({ row }: { row: Row<GridCell> }) => {
-  const { handleDelete, assignmentsGenerated } = useGridContext();
+const ActionCell = ({ row }: { row: Row<CellTypes> }) => {
+  const { handleDelete } = useGridContext();
   const rowData = row.original;
   return (
     <DropdownMenu>
@@ -26,8 +27,7 @@ const ActionCell = ({ row }: { row: Row<GridCell> }) => {
       <DropdownMenuContent align="end">
         <DropdownMenuItem
           className="text-red-500"
-          disabled={assignmentsGenerated}
-          onClick={() => handleDelete(rowData.uuid as string)}
+          onClick={() => handleDelete(rowData.id)}
         >
           Delete
         </DropdownMenuItem>
@@ -36,24 +36,24 @@ const ActionCell = ({ row }: { row: Row<GridCell> }) => {
   );
 };
 
-export const columns: ColumnDef<GridCell>[] = [
+export const columns: ColumnDef<CellTypes>[] = [
   {
-    accessorKey: 'name',
+    accessorKey: 'assigned_value',
     header: 'Player',
-    filterFn: (row) => row.getValue('name') !== null,
+    filterFn: (row) => row.getValue('assigned_value') !== null,
   },
   {
-    accessorKey: 'row',
+    accessorKey: 'row_index',
     header: 'Row',
     cell: ({ row }) => {
-      return row.original.row + 1;
+      return row.original.row_index + 1;
     },
   },
   {
-    accessorKey: 'col',
+    accessorKey: 'col_index',
     header: 'Column',
     cell: ({ row }) => {
-      return row.original.col + 1;
+      return row.original.col_index + 1;
     },
   },
   {

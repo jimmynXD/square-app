@@ -33,7 +33,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([
     {
-      id: 'name',
+      id: 'assigned_value',
       value: '',
     },
   ]);

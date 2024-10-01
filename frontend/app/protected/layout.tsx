@@ -26,8 +26,8 @@ export default async function ProtectedLayout({
     return redirect('/sign-in');
   }
 
-  await prefetchQuery(queryClient, GridAPI.getAll(supabase, user.id));
-  await prefetchQuery(queryClient, GridAPI.getSchedule(supabase));
+  await prefetchQuery(queryClient, GridAPI.v0.getManyGrids(supabase, user.id));
+  await prefetchQuery(queryClient, GridAPI.v0.getUpcomingSchedules(supabase));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

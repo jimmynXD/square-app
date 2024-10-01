@@ -1,9 +1,5 @@
-import Hero from '@/components/hero';
+import Hero from './hero';
 
 export default async function Index() {
-  return (
-    <>
-      <Hero />
-    </>
-  );
+  return <Hero />;
 }
