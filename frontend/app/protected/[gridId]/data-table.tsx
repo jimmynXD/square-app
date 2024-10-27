@@ -18,48 +18,56 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-// import { Button } from '@/components/ui/button';
-// import { Input } from '@/components/ui/input';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { useGridContext } from '@/context/GridContext';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  initialColumnFilter?: ColumnFiltersState;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  initialColumnFilter = [],
 }: DataTableProps<TData, TValue>) {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([
-    {
-      id: 'assigned_value',
-      value: '',
-    },
-  ]);
+  const { handleDelete } = useGridContext();
+
+  const [columnFilters, setColumnFilters] =
+    useState<ColumnFiltersState>(initialColumnFilter);
+  const [rowSelection, setRowSelection] = useState({});
+
   const table = useReactTable({
+    // @ts-expect-error id is there
+    getRowId: (row) => row.id,
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    // getPaginationRowModel: getPaginationRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onRowSelectionChange: setRowSelection,
+
     state: {
       columnFilters,
+      rowSelection,
     },
   });
+
+  const handleDeleteSelected = () => {
+    const cellIds = table
+      .getFilteredSelectedRowModel()
+      .rows.map((row) => parseInt(row.id));
+    handleDelete(cellIds);
+  };
   return (
     <div>
-      {/* <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter players..."
-          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('name')?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-      </div> */}
+      <div>
+        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+          <Button onClick={handleDeleteSelected}>Delete selected</Button>
+        )}
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>

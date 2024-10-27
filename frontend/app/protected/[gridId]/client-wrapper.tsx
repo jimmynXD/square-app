@@ -1,6 +1,15 @@
 'use client';
 import { useGridContext } from '@/context/GridContext';
-import { formattedDate } from '@/utils/utils';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import Link from 'next/link';
+import Scoreboard from '@/components/Scoreboard';
 
 export default function ClientWrapper({
   children,
@@ -8,15 +17,25 @@ export default function ClientWrapper({
   children: React.ReactNode;
 }) {
   const { gridInfo } = useGridContext();
+
   return (
-    <div className="flex-1 space-y-4 xl:max-w-7xl xl:mx-auto p-8">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">{gridInfo?.name}</h2>
+    <div className="container mx-auto p-8 space-y-4">
+      <div>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">My Grids</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{gridInfo?.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
-      <p className="text-sm text-gray-500">
-        {gridInfo?.nfl_schedule?.short_name || ''} |{' '}
-        {formattedDate(new Date(gridInfo?.nfl_schedule?.date || ''))}
-      </p>
+      <Scoreboard gridInfo={gridInfo} />
       {children}
     </div>
   );

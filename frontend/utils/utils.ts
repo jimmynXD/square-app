@@ -41,3 +41,21 @@ export const formattedDate = (date: Date) => {
     timeZoneName: 'short',
   });
 };
+
+export const formattedScoreboardDate = (date: Date) => {
+  // return Day of Week (THU), date (10/10), time (8:20 PM EDT) as individual strings
+  const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
+
+  const monthDay = date.toLocaleDateString('en-US', {
+    month: 'numeric',
+    day: 'numeric',
+  });
+  const time = date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZoneName: 'short',
+  });
+  return { dayOfWeek, monthDay, time };
+};
