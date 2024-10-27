@@ -11,7 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { CellTypes } from '@/utils/types';
+import { CellTypes, WinnerJsonType } from '@/utils/types';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const ActionCell = ({ row }: { row: Row<CellTypes> }) => {
   const { handleDelete } = useGridContext();
@@ -38,6 +39,28 @@ const ActionCell = ({ row }: { row: Row<CellTypes> }) => {
 
 export const columns: ColumnDef<CellTypes>[] = [
   {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
     accessorKey: 'assigned_value',
     header: 'Player',
     filterFn: (row) => row.getValue('assigned_value') !== null,
@@ -46,18 +69,52 @@ export const columns: ColumnDef<CellTypes>[] = [
     accessorKey: 'row_index',
     header: 'Row',
     cell: ({ row }) => {
-      return row.original.row_index + 1;
+      return row.original.row_index! + 1;
     },
   },
   {
     accessorKey: 'col_index',
     header: 'Column',
     cell: ({ row }) => {
-      return row.original.col_index + 1;
+      return row.original.col_index! + 1;
     },
   },
   {
     id: 'actions',
     cell: ActionCell,
+  },
+];
+
+/**
+ * export type WinnerJsonType = {
+  name: string;
+  quarter: number;
+  score: string;
+  x: number;
+  y: number;
+};
+
+ */
+export const winnersColumns: ColumnDef<WinnerJsonType>[] = [
+  {
+    accessorKey: 'name',
+    header: 'Player',
+  },
+
+  {
+    accessorKey: 'quarter',
+    header: 'Quarter',
+    cell: ({ row }) => {
+      const quarter = row.original.quarter;
+      return quarter;
+    },
+  },
+  {
+    accessorKey: 'y',
+    header: 'Row',
+  },
+  {
+    accessorKey: 'x',
+    header: 'Column',
   },
 ];

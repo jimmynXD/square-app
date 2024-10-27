@@ -8,12 +8,14 @@ import {
   dehydrate,
 } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ClientTableWrapper from './client-table-wrapper';
+import ClientTableWrapper, {
+  WinnersTableWrapper,
+} from './client-table-wrapper';
 import ClientGrid from './client-grid';
-import UpdateCellDrawer from './update-cell-drawer';
 import ClientWrapper from './client-wrapper';
+import ActionButtonGroup from './action-buttons-group';
 
-export default async function GridPage({
+export default async function UserGridPage({
   params,
 }: {
   params: { gridId: string };
@@ -29,6 +31,11 @@ export default async function GridPage({
     GridAPI.v0.getManyCells(supabase, params.gridId)
   );
 
+  await prefetchQuery(
+    queryClient,
+    GridAPI.v0.getWinners(supabase, params.gridId)
+  );
+
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <GridProvider gridId={params.gridId}>
@@ -38,14 +45,18 @@ export default async function GridPage({
               <TabsList>
                 <TabsTrigger value="grid">Grid</TabsTrigger>
                 <TabsTrigger value="players">Players</TabsTrigger>
+                <TabsTrigger value="winners">Winners</TabsTrigger>
               </TabsList>
-              <UpdateCellDrawer />
+              <ActionButtonGroup />
             </div>
             <TabsContent value="grid">
               <ClientGrid />
             </TabsContent>
             <TabsContent value="players">
               <ClientTableWrapper />
+            </TabsContent>
+            <TabsContent value="winners">
+              <WinnersTableWrapper />
             </TabsContent>
           </Tabs>
         </ClientWrapper>

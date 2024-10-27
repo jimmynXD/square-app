@@ -10,3 +10,6 @@ export type NFLScheduleTypes =
 
 export type NFLGamesOfWeekTypes =
   Database['public']['Tables']['nfl_scores']['Row'];
+
+export type NFLGameScoreTypes =
+  Database['public']['Tables']['nfl_scores']['Row'];

@@ -17,7 +17,6 @@ import useSupabaseBrowser from '@/utils/supabase/client';
 import { useUser } from '@/context/UserContext';
 import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import LoadingOverlay from '@/components/LoadingOverlay';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { formattedDate } from '@/utils/utils';
 import {
   Select,
@@ -29,18 +28,21 @@ import {
   SelectLabel,
 } from '@/components/ui/select';
 import { ScheduleTypes } from '@/utils/types';
+import { Toggle } from '@/components/ui/toggle';
 
 export default function CreateGridSheet() {
-  const [open, setOpen] = useState(false);
-  const [gridName, setGridName] = useState('');
-  const [numCols, setNumCols] = useState(10);
-  const [numRows, setNumRows] = useState(10);
-  const [loading, setLoading] = useState(false);
-  const [event, setEvent] = useState('');
-
   const router = useRouter();
   const supabase = useSupabaseBrowser();
   const { userId } = useUser();
+
+  const [open, setOpen] = useState<boolean>(false);
+  const [gridName, setGridName] = useState<string>('');
+  const [size] = useState<{ cols: number; rows: number }>({
+    cols: 10,
+    rows: 10,
+  });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [event, setEvent] = useState<string>('');
 
   const { refetch } = useQuery(GridAPI.v0.getManyGrids(supabase, userId));
   const { data: scheduleData } = useQuery(
@@ -53,8 +55,8 @@ export default function CreateGridSheet() {
       supabase,
       userId,
       gridName,
-      numCols,
-      numRows,
+      size.cols,
+      size.rows,
       event
     );
 
@@ -69,12 +71,23 @@ export default function CreateGridSheet() {
     const { error: cellsError } = await GridAPI.v0.createManyCells(
       supabase,
       newGridId!,
-      numCols,
-      numRows
+      size.cols,
+      size.rows
     );
 
     if (cellsError) {
       console.error('Error creating grid cells:', cellsError);
+      setLoading(false); // Reset loading state
+      return;
+    }
+
+    const { error: winnersError } = await GridAPI.v0.createWinners(
+      supabase,
+      newGridId!
+    );
+
+    if (winnersError) {
+      console.error('Error creating winners:', winnersError);
       setLoading(false); // Reset loading state
       return;
     }
@@ -110,49 +123,46 @@ export default function CreateGridSheet() {
                 required
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="f">
+              <Label htmlFor="layout">Layout</Label>
               <div>
-                <Label htmlFor="numCols">Columns</Label>
-                <ToggleGroup
-                  variant="outline"
-                  type="single"
-                  value={String(numCols)}
-                  onValueChange={(value) => {
-                    if (value) setNumCols(Number(value));
-                  }}
-                  className="justify-start"
-                >
-                  <ToggleGroupItem value="10" aria-label="Toggle bold">
-                    <span className="text-sm w-4 h-4 leading-none">10</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="5" aria-label="Toggle italic">
-                    <span className="text-sm w-4 h-4 leading-none">5</span>
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-              <div>
-                <Label htmlFor="numRows">Rows</Label>
-                <ToggleGroup
-                  variant="outline"
-                  type="single"
-                  value={String(numRows)}
-                  onValueChange={(value) => {
-                    if (value) setNumRows(Number(value));
-                  }}
-                  className="justify-start"
-                >
-                  <ToggleGroupItem value="10" aria-label="Toggle bold">
-                    <span className="text-sm w-4 h-4 leading-none">10</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="5" aria-label="Toggle italic">
-                    <span className="text-sm w-4 h-4 leading-none">5</span>
-                  </ToggleGroupItem>
-                </ToggleGroup>
+                <Toggle variant="outline" id="layout" pressed disabled>
+                  <span className=" leading-none">10x10</span>
+                </Toggle>
               </div>
             </div>
+            {/* <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="layout">Layout</Label>
+                <ToggleGroup
+                  id="layout"
+                  variant="outline"
+                  type="single"
+                  defaultValue="10"
+                  disabled
+                  onValueChange={(value) => {
+                    if (value === '10') setSize({ cols: 10, rows: 10 });
+                    if (value === '5') setSize({ cols: 5, rows: 5 });
+                  }}
+                  className="justify-start"
+                >
+                  <ToggleGroupItem
+                    value="10"
+                    aria-label="Toggle bold"
+                    defaultChecked
+                  >
+                    <span className="text-sm w-12 h-4 leading-none">10x10</span>
+                  </ToggleGroupItem>
+                  <ToggleGroupItem disabled value="5" aria-label="Toggle italic">
+                    <span className="text-sm w-12 h-4 leading-none">5x5</span>
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+            </div> */}
             <div>
+              <Label htmlFor="game">Game</Label>
               <Select onValueChange={handleEventChange}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full" id="game">
                   <SelectValue placeholder="Select a game" />
                 </SelectTrigger>
                 <SelectContent>

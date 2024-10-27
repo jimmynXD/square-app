@@ -1,14 +1,20 @@
 import { Router } from 'express';
 import {
+  updateNFLGameScoresData,
   getGameByEventId,
-  getNFLGamesOfWeekData,
-  updateNFLGamesOfWeekData,
+  getNFLGameScoresData,
+  updateWinnerData,
+  updateAllWinnersData,
+  updateLiveScoresAndWinnersData,
 } from '../controllers/scoreController';
 
 const scoreRoutes = Router();
 
-scoreRoutes.get('/', getNFLGamesOfWeekData);
+scoreRoutes.get('/', getNFLGameScoresData);
 scoreRoutes.get('/:eventId', getGameByEventId);
-scoreRoutes.put('/update', updateNFLGamesOfWeekData);
+scoreRoutes.put('/update', updateNFLGameScoresData);
+scoreRoutes.put('/update/winner', updateAllWinnersData);
+scoreRoutes.put('/update/winner/:gridId', updateWinnerData);
+scoreRoutes.put('/update-live', updateLiveScoresAndWinnersData);
 
 export default scoreRoutes;
