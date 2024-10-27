@@ -4,6 +4,7 @@ import {
   NFLScheduleTypes,
   TeamTypes,
   NFLGamesOfWeekTypes,
+  NFLGameScoreTypes,
 } from '../utils/types';
 import dotenv from 'dotenv';
 
@@ -12,9 +13,25 @@ dotenv.config();
 const fetchTeamData = async (): Promise<TeamTypes[]> => {
   try {
     const response = await axios.get(process.env.NFL_TEAMS_ENDPOINT!);
-    const teams = response.data.sports[0].leagues[0].teams.map(
-      (teamData: any) => {
+    // get records from each team through the abbreviation at end of nfl_teams_endpoint
+    const teamsPromises = response.data.sports[0].leagues[0].teams.map(
+      async (teamData: any) => {
         const team = teamData.team;
+        const teamAbbreviation = team.abbreviation;
+
+        let record = 'N/A';
+        try {
+          const teamRecord = await axios.get(
+            `${process.env.NFL_TEAMS_ENDPOINT!}/${teamAbbreviation}`
+          );
+
+          record = teamRecord.data.team.record.items[0].summary;
+        } catch (recordError) {
+          console.warn(
+            `Failed to fetch record for team ${teamAbbreviation}:`,
+            recordError
+          );
+        }
         return {
           abbreviation: team.abbreviation,
           alternate_color: team.alternateColor,
@@ -29,10 +46,11 @@ const fetchTeamData = async (): Promise<TeamTypes[]> => {
           slug: team.slug,
           team_id: team.id,
           uid: team.uid,
+          record,
         } as TeamTypes;
       }
     );
-
+    const teams = await Promise.all(teamsPromises);
     return teams;
   } catch (error) {
     console.error('Error fetching team data:', error);
@@ -85,12 +103,13 @@ const fetchNFLScheduleData = async (): Promise<NFLScheduleTypes[]> => {
   }
 };
 
-const fetchNFLGamesOfWeekData = async (): Promise<NFLGamesOfWeekTypes[]> => {
+const fetchLiveScoresData = async (): Promise<NFLGameScoreTypes[]> => {
   try {
-    const response = await axios.get(process.env.NFL_SCOREBOARD_ENDPOINT!);
+    const response = await axios.get(process.env.NFL_LIVE_SCOREBOARD_ENDPOINT!);
 
     const scoresData = response.data.events.flatMap((event: any) => ({
       event_id: event.id,
+      game_status: event.status.type.state,
       home_score: parseInt(
         event.competitions[0].competitors.find(
           (comp: any) => comp.homeAway === 'home'
@@ -109,10 +128,8 @@ const fetchNFLGamesOfWeekData = async (): Promise<NFLGamesOfWeekTypes[]> => {
       away_quarter_scores: event.competitions[0].competitors.find(
         (comp: any) => comp.homeAway === 'away'
       ).linescores,
-      game_status: event.status.type.state,
       current_quarter: event.status.period,
       current_time_left: convertToDisplayClock(event.status.displayClock),
-      completed: event.status.type.completed,
     }));
 
     return scoresData;
@@ -122,4 +139,61 @@ const fetchNFLGamesOfWeekData = async (): Promise<NFLGamesOfWeekTypes[]> => {
   }
 };
 
-export default { fetchTeamData, fetchNFLScheduleData, fetchNFLGamesOfWeekData };
+const fetchAllScoresData = async (): Promise<NFLGameScoreTypes[]> => {
+  try {
+    const fullSchedule = await fetchNFLScheduleData();
+    const eventIds = fullSchedule.map((event) => event.event_id);
+
+    const scoresPromises = eventIds.map((eventId) =>
+      axios.get(
+        process.env.NFL_GAME_SCORE_ENDPOINT!.replace('{eventId}', eventId)
+      )
+    );
+
+    const scoresResponse = await Promise.all(scoresPromises);
+
+    const combinedScoresData = scoresResponse.flatMap((response) => {
+      const games = Array.isArray(response.data)
+        ? response.data
+        : [response.data];
+
+      return games.map((game: any) => ({
+        event_id: game.id,
+        game_status: game.status.type.state,
+        home_score:
+          parseInt(
+            game.competitions[0].competitors.find(
+              (comp: any) => comp.homeAway === 'home'
+            ).score,
+            10
+          ) || 0,
+        away_score:
+          parseInt(
+            game.competitions[0].competitors.find(
+              (comp: any) => comp.homeAway === 'away'
+            ).score,
+            10
+          ) || 0,
+        home_quarter_scores: game.competitions[0].competitors.find(
+          (comp: any) => comp.homeAway === 'home'
+        ).linescores,
+        away_quarter_scores: game.competitions[0].competitors.find(
+          (comp: any) => comp.homeAway === 'away'
+        ).linescores,
+        current_quarter: game.status.period!,
+        current_time_left: convertToDisplayClock(game.status.displayClock),
+      }));
+    }) as NFLGameScoreTypes[];
+
+    return combinedScoresData;
+  } catch (error) {
+    console.error('Error fetching NFL games of the week data:', error);
+    throw error;
+  }
+};
+export default {
+  fetchTeamData,
+  fetchNFLScheduleData,
+  fetchLiveScoresData,
+  fetchAllScoresData,
+};
