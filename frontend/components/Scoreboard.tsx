@@ -1,9 +1,11 @@
 import { Skeleton } from './ui/skeleton';
 import { GridAPI } from '@/queries/grid.api';
 import useSupabaseBrowser from '@/utils/supabase/client';
+import { ScoreTypes } from '@/utils/types';
 import { formattedScoreboardDate } from '@/utils/utils';
 import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 type TeamInfoProps = {
   team: {
@@ -19,14 +21,44 @@ type ScoreboardScoreProps = {
 };
 export default function Scoreboard({ gridInfo }: ScoreboardScoreProps) {
   const supabase = useSupabaseBrowser();
+  const [liveScore, setLiveScore] = useState<ScoreTypes | null>(null);
 
   const {
-    data: currentScore,
+    data: initialScore,
     error,
     isLoading,
   } = useQuery(
     GridAPI.v0.getScore(supabase, gridInfo?.nfl_schedule?.event_id || '')
   );
+
+  useEffect(() => {
+    if (!gridInfo?.nfl_schedule?.event_id) return;
+
+    // Set initial score
+    if (initialScore) {
+      setLiveScore(initialScore);
+    }
+
+    // Subscribe to score updates
+    const channel = GridAPI.v0.subscribeToScore(
+      supabase,
+      gridInfo.nfl_schedule.event_id,
+      (payload) => {
+        if (payload.eventType === 'DELETE') {
+          setLiveScore(null);
+        } else {
+          setLiveScore(payload.new);
+        }
+      }
+    );
+
+    // Cleanup subscription
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [supabase, gridInfo?.nfl_schedule?.event_id, initialScore]);
+
+  const currentScore = liveScore;
 
   if (error) {
     console.error('Error fetching current scores:', error);

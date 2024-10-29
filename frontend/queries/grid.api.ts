@@ -1,5 +1,5 @@
 import { TablesInsert, TablesUpdate } from '@/utils/generated/database.types';
-import { TypedSupabaseClient } from '@/utils/types';
+import { ScoreTypes, TypedSupabaseClient, WinnerTypes } from '@/utils/types';
 import { getISODateShort } from '@/utils/utils';
 
 export const GridAPI = {
@@ -12,14 +12,10 @@ export const GridAPI = {
         .order('created_at', { ascending: false });
     },
     getGrid: (client: TypedSupabaseClient, gridId: string) => {
-      return (
-        client
-          .from('grids')
-          // .select(
-          //   '*, nfl_schedule(*, home_team:teams!nfl_schedule_home_team_id_fkey(*), away_team:teams!nfl_schedule_away_team_id_fkey(*))'
-          // )
-          .select(
-            `
+      return client
+        .from('grids')
+        .select(
+          `
             *,
             nfl_schedule (
             *,
@@ -27,10 +23,9 @@ export const GridAPI = {
             away_team:teams!nfl_schedule_away_team_id_fkey (name, abbreviation, display_name, logos, record)
             )
             `
-          )
-          .eq('uuid', gridId)
-          .single()
-      );
+        )
+        .eq('uuid', gridId)
+        .single();
     },
     getManyCells: (client: TypedSupabaseClient, gridId: string) => {
       return client.from('cell_assignments').select('*').eq('grid_id', gridId);
@@ -49,6 +44,35 @@ export const GridAPI = {
         .select('*')
         .eq('event_id', eventId)
         .single();
+    },
+    subscribeToScore: (
+      client: TypedSupabaseClient,
+      eventId: string,
+      callback: (payload: {
+        new: ScoreTypes;
+        old: ScoreTypes;
+        eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+      }) => void
+    ) => {
+      return client
+        .channel(`nfl_scores:${eventId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'nfl_scores',
+            filter: `event_id=eq.${eventId}`,
+          },
+          (payload) => {
+            callback({
+              new: payload.new as ScoreTypes,
+              old: payload.old as ScoreTypes,
+              eventType: payload.eventType,
+            });
+          }
+        )
+        .subscribe();
     },
     createGrid: (
       client: TypedSupabaseClient,
@@ -166,6 +190,35 @@ export const GridAPI = {
         .from('cell_assignments')
         .update({ assigned_value: null })
         .eq('grid_id', gridId);
+    },
+    subscribeToWinners: (
+      client: TypedSupabaseClient,
+      gridId: string,
+      callback: (payload: {
+        new: WinnerTypes;
+        old: WinnerTypes;
+        eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+      }) => void
+    ) => {
+      return client
+        .channel(`winners:${gridId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'winners',
+            filter: `grid_id=eq.${gridId}`,
+          },
+          (payload) => {
+            callback({
+              new: payload.new as WinnerTypes,
+              old: payload.old as WinnerTypes,
+              eventType: payload.eventType,
+            });
+          }
+        )
+        .subscribe();
     },
   },
 };

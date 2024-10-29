@@ -1,6 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useCallback,
+  useState,
+  useEffect,
+} from 'react';
 import { GridAPI } from '@/queries/grid.api';
 import useSupabaseBrowser from '@/utils/supabase/client';
 import { shuffle } from '@/utils/utils';
@@ -39,6 +45,7 @@ export function GridProvider({
   const supabase = useSupabaseBrowser();
   const { userId } = useUser();
   const { toast } = useToast();
+  const [winners, setWinners] = useState<WinnerTypes | null>(null);
 
   const { data: allGrids, refetch: refetchAllGrids } = useQuery(
     GridAPI.v0.getManyGrids(supabase, userId)
@@ -52,9 +59,27 @@ export function GridProvider({
     GridAPI.v0.getManyCells(supabase, gridId)
   );
 
-  const { data: winnersData } = useQuery(
+  const { data: initialWinners } = useQuery(
     GridAPI.v0.getWinners(supabase, gridId)
   );
+
+  useEffect(() => {
+    if (initialWinners) {
+      setWinners(initialWinners);
+    }
+
+    const channel = GridAPI.v0.subscribeToWinners(
+      supabase,
+      gridId,
+      (payload) => {
+        setWinners(payload.new);
+      }
+    );
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [supabase, gridId, initialWinners]);
 
   const handleRandomAssign = useCallback(
     async (assignments: { name: string; count: number }[]) => {
@@ -186,7 +211,7 @@ export function GridProvider({
     numCols: allGrids?.find((grid) => grid.uuid === gridId)?.num_cols || 10,
     numEmptyCells:
       allGrids?.find((grid) => grid.uuid === gridId)?.total_empty_cells || 0,
-    winnersData: winnersData as WinnerTypes,
+    winnersData: winners as WinnerTypes,
     handleLockGrid,
   };
 

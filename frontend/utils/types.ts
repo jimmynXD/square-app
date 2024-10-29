@@ -11,6 +11,7 @@ export type GridInfoType = Database['public']['Tables']['grids']['Row'] & {
 };
 
 export type WinnerTypes = Database['public']['Tables']['winners']['Row'];
+export type ScoreTypes = Database['public']['Tables']['nfl_scores']['Row'];
 
 export type WinnerScoreType = { value: number };
 

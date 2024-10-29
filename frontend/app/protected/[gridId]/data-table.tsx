@@ -26,12 +26,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   initialColumnFilter?: ColumnFiltersState;
+  gridLocked?: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   initialColumnFilter = [],
+  gridLocked,
 }: DataTableProps<TData, TValue>) {
   const { handleDelete } = useGridContext();
 
@@ -64,7 +66,7 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       <div>
-        {table.getFilteredSelectedRowModel().rows.length > 0 && (
+        {table.getFilteredSelectedRowModel().rows.length > 0 && !gridLocked && (
           <Button onClick={handleDeleteSelected}>Delete selected</Button>
         )}
       </div>

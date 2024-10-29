@@ -5,12 +5,13 @@ import { useGridContext } from '@/context/GridContext';
 import { WinnerJsonType } from '@/utils/types';
 
 export default function ClientTableWrapper() {
-  const { cellsData } = useGridContext();
+  const { cellsData, gridInfo } = useGridContext();
   return (
     <div>
       <DataTable
+        gridLocked={gridInfo?.locked_at}
         data={cellsData}
-        columns={columns}
+        columns={columns(gridInfo?.locked_at)}
         initialColumnFilter={[
           {
             id: 'assigned_value',
@@ -28,6 +29,7 @@ export function WinnersTableWrapper() {
   if (!winnersData || winnersData?.winners == null) {
     return <div>No winners found</div>;
   }
+
   return (
     <div>
       <DataTable
