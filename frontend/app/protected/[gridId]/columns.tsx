@@ -37,26 +37,28 @@ const ActionCell = ({ row }: { row: Row<CellTypes> }) => {
   );
 };
 
-export const columns: ColumnDef<CellTypes>[] = [
+export const columns = (lockedAt: string | null): ColumnDef<CellTypes>[] => [
   {
     id: 'select',
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
+    header: ({ table }) =>
+      !lockedAt ? (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ) : null,
+    cell: ({ row }) =>
+      !lockedAt ? (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ) : null,
     enableSorting: false,
     enableHiding: false,
   },
@@ -79,9 +81,10 @@ export const columns: ColumnDef<CellTypes>[] = [
       return row.original.col_index! + 1;
     },
   },
+  // disable actions if grid is locked
   {
     id: 'actions',
-    cell: ActionCell,
+    cell: () => (lockedAt ? null : ActionCell),
   },
 ];
 
