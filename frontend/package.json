@@ -2,6 +2,7 @@
   "name": "squares-app",
   "private": true,
   "version": "0.0.0",
+  "license": "UNLICENSED",
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
