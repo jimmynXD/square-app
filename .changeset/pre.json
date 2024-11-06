@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "squares-app-monorepo": "0.0.0"
+  },
+  "changesets": [
+    "fuzzy-rockets-push"
+  ]
+}

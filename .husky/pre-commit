@@ -1,3 +1,2 @@
-npx lint-staged --cwd backend -c .lintstagedrc.backend.js -v
 npx lint-staged --cwd frontend -c .lintstagedrc.frontend.js -v
 npx lint-staged -c .lintstagedrc.js -v

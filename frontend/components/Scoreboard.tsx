@@ -1,7 +1,7 @@
 import { Skeleton } from './ui/skeleton';
 import { GridAPI } from '@/queries/grid.api';
 import useSupabaseBrowser from '@/utils/supabase/client';
-import { ScoreTypes } from '@/utils/types';
+import { ScoreTypes, WinnerScoreType } from '@/utils/types';
 import { formattedScoreboardDate } from '@/utils/utils';
 import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import Image from 'next/image';

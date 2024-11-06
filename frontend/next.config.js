@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
     dirs: ['app', 'components', 'context', 'hooks', 'lib', 'queries', 'utils'],

@@ -32,3 +32,8 @@ export function createClient() {
 export function useSupabaseServer() {
   return createClient();
 }
+
+// Combat hook naming convention for async functions
+export function getSupabaseServer() {
+  return createClient();
+}

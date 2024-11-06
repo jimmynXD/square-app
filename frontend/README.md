@@ -1,1 +1,1 @@
-# Squares App
+# Squares App Frontend

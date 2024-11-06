@@ -6,9 +6,18 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error(err.stack);
-  console.error(err.message);
-  res.status(500).send('Something broke!');
+  console.error('Error:', err.message);
+
+  // Don't send another response if one has already been sent
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  return res.status(500).json({
+    error: {
+      message: err.message || 'Internal Server Error',
+    },
+  });
 };
 
 export default errorHandler;
