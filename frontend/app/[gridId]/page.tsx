@@ -1,5 +1,5 @@
 import { GridAPI } from '@/queries/grid.api';
-import { useSupabaseServer } from '@/utils/supabase/server';
+import { getSupabaseServer } from '@/utils/supabase/server';
 import { prefetchQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import {
   HydrationBoundary,
@@ -15,7 +15,7 @@ export default async function GridPage({
 }) {
   const queryClient = new QueryClient();
 
-  const supabase = useSupabaseServer();
+  const supabase = getSupabaseServer();
 
   await prefetchQuery(queryClient, GridAPI.v0.getGrid(supabase, params.gridId));
 

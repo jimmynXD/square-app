@@ -11,17 +11,21 @@ export const updateTeamsData = async (
 ) => {
   try {
     const teamData: TeamTypes[] = await sportsDataService.fetchTeamData();
-    if (teamData.length > 0) {
-      const { error } = await supabase.from('teams').upsert(teamData, {
-        onConflict: 'team_id',
-      });
-      if (error) {
-        next(error);
-      }
+    if (!teamData || teamData.length === 0) {
+      return res.status(404).json({ message: 'No team data found' });
     }
-    res.status(200).json({ message: 'Teams data updated successfully' });
+
+    const { error } = await supabase.from('teams').upsert(teamData, {
+      onConflict: 'team_id',
+    });
+
+    if (error) {
+      return next(error);
+    }
+
+    return res.status(200).json({ message: 'Teams data updated successfully' });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -32,18 +36,18 @@ export const getTeamsData = async (
   next: NextFunction
 ) => {
   try {
-    const { data, error: fetchError } = await supabase
+    const { data, error } = await supabase
       .from('teams')
       .select('*')
       .order('display_name', { ascending: true });
 
-    if (fetchError) {
-      next(fetchError);
+    if (error) {
+      return next(error);
     }
 
-    res.json(data);
+    return res.json(data);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -55,18 +59,19 @@ export const getTeamByAbbreviation = async (
 ) => {
   try {
     const { abbreviation } = req.params;
+    const uppercaseAbbreviation = abbreviation.toUpperCase();
     const { data, error } = await supabase
       .from('teams')
       .select('*')
-      .eq('abbreviation', abbreviation)
+      .eq('abbreviation', uppercaseAbbreviation)
       .single();
 
     if (error) {
-      next(error);
+      return next(error);
     }
 
-    res.json(data);
+    return res.json(data);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };

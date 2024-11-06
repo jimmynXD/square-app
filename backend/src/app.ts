@@ -9,6 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.status(200).send('OK');
+});
+
 app.use('/api/v0/team', teamRoutes);
 app.use('/api/v0/schedule', scheduleRoutes);
 app.use('/api/v0/score', scoreRoutes);

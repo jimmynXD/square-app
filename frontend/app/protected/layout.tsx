@@ -1,6 +1,6 @@
 import { UserProvider } from '@/context/UserContext';
 import { GridAPI } from '@/queries/grid.api';
-import { useSupabaseServer } from '@/utils/supabase/server';
+import { getSupabaseServer } from '@/utils/supabase/server';
 import { prefetchQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import {
   HydrationBoundary,
@@ -16,7 +16,7 @@ export default async function ProtectedLayout({
 }) {
   const queryClient = new QueryClient();
 
-  const supabase = useSupabaseServer();
+  const supabase = getSupabaseServer();
 
   const {
     data: { user },
