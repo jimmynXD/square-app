@@ -34,6 +34,10 @@ RUN corepack enable pnpm && pnpm run build
 # Production image, copy all the files and run next
 FROM --platform=linux/amd64 node:18-alpine AS runner
 WORKDIR /app
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 ENV NODE_ENV=production
 

@@ -53,6 +53,7 @@ ENV NFL_GAME_SCORE_ENDPOINT=$NFL_GAME_SCORE_ENDPOINT
 ENV PORT 8080
 ENV NODE_ENV production
 
+RUN corepack enable pnpm 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 expressjs
@@ -62,14 +63,14 @@ RUN chown -R expressjs:nodejs .
 
 # Copy built assets
 COPY --from=builder --chown=expressjs:nodejs /app/dist ./dist
-COPY --from=builder --chown=expressjs:nodejs /app/package*.json ./
+COPY --from=builder --chown=expressjs:nodejs /app/package*.json /app/pnpm-lock.yaml ./
 
 # Switch to non-root user
 USER expressjs
 
-# Install production dependencies only
-RUN corepack enable pnpm && pnpm i --frozen-lockfile
-
 EXPOSE 8080
+
+# Install production dependencies
+RUN pnpm i --frozen-lockfile --prod
 
 ENTRYPOINT ["node", "dist/server.js"]
