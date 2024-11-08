@@ -38,12 +38,16 @@ export const signUpAction = async (formData: FormData) => {
 export const signInAction = async () => {
   const supabase = createClient();
   const origin = headers().get('origin');
-  // 2. Sign in with GitHub
+  const forwardedHost = headers().get('x-forwarded-host');
+  const redirectUrl =
+    process.env.NODE_ENV === 'production' && forwardedHost
+      ? `https://${forwardedHost}/auth/callback`
+      : `${origin}/auth/callback`;
+
   const { error, data } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: redirectUrl,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',
@@ -53,10 +57,8 @@ export const signInAction = async () => {
 
   if (error) {
     console.log(error);
-    // return encodedRedirect('error', '/sign-in', error.message);
   } else {
     return redirect(data.url);
-    // return redirect('/protected');
   }
 };
 
