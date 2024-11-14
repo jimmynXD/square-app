@@ -131,34 +131,7 @@ export default function CreateGridSheet() {
                 </Toggle>
               </div>
             </div>
-            {/* <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="layout">Layout</Label>
-                <ToggleGroup
-                  id="layout"
-                  variant="outline"
-                  type="single"
-                  defaultValue="10"
-                  disabled
-                  onValueChange={(value) => {
-                    if (value === '10') setSize({ cols: 10, rows: 10 });
-                    if (value === '5') setSize({ cols: 5, rows: 5 });
-                  }}
-                  className="justify-start"
-                >
-                  <ToggleGroupItem
-                    value="10"
-                    aria-label="Toggle bold"
-                    defaultChecked
-                  >
-                    <span className="text-sm w-12 h-4 leading-none">10x10</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem disabled value="5" aria-label="Toggle italic">
-                    <span className="text-sm w-12 h-4 leading-none">5x5</span>
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-            </div> */}
+
             <div>
               <Label htmlFor="game">Game</Label>
               <Select onValueChange={handleEventChange}>

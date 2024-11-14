@@ -86,7 +86,7 @@ export default function GridDataTable() {
 
   return gridData && gridData.length > 0 ? (
     <Table>
-      <TableHeader>
+      <TableHeader className="hidden md:table-header-group">
         <TableRow>
           <TableHead />
           <TableHead>Name</TableHead>
@@ -100,13 +100,14 @@ export default function GridDataTable() {
       </TableHeader>
       <TableBody>
         {gridData.map((grid) => (
-          <TableRow key={grid.id}>
+          <TableRow key={grid.id} className="flex flex-col md:table-row">
             <TableCell>
               {grid.locked_at && new Date(grid.locked_at).getTime() > 0 && (
                 <LockKeyholeIcon className="w-4 h-4" />
               )}
             </TableCell>
             <TableCell>
+              <div className="md:hidden font-medium">Name</div>
               {editingName === grid.uuid ? (
                 <form
                   className="flex gap-1 items-center"
@@ -152,10 +153,15 @@ export default function GridDataTable() {
               )}
             </TableCell>
             <TableCell>
+              <div className="md:hidden font-medium">Size</div>
               {grid.num_cols}x{grid.num_rows}
             </TableCell>
-            <TableCell>{grid.total_empty_cells}</TableCell>
             <TableCell>
+              <div className="md:hidden font-medium">Empty Squares</div>
+              {grid.total_empty_cells}
+            </TableCell>
+            <TableCell>
+              <div className="md:hidden font-medium">Game</div>
               {editingEvent === grid.uuid ? (
                 <form
                   className="flex gap-1 items-center"
@@ -200,17 +206,19 @@ export default function GridDataTable() {
               )}
             </TableCell>
             <TableCell>
+              <div className="md:hidden font-medium">Start Time</div>
               {grid.nfl_schedule?.date
                 ? formattedDate(new Date(grid.nfl_schedule?.date))
                 : ''}
             </TableCell>
             <TableCell>
+              <div className="md:hidden font-medium">Created</div>
               {grid.created_at
                 ? formattedDate(new Date(grid.created_at))
                 : 'N/A'}
             </TableCell>
             <TableCell>
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-between">
                 <Button asChild variant={'ghost'}>
                   <Link target="_blank" href={`/${grid.uuid}`}>
                     <ExternalLinkIcon className="w-4 h-4" />
