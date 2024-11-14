@@ -86,7 +86,7 @@ export default function Scoreboard({ gridInfo }: ScoreboardScoreProps) {
         width={50}
         height={50}
       />
-      <div className="flex flex-col items-center">
+      <div className="hidden md:flex flex-col items-center">
         <p>{team.display_name}</p>
         {currentScore?.game_status === 'pre' && (
           <p className="text-sm">({team.record})</p>
