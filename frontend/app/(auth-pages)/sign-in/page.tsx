@@ -1,5 +1,5 @@
 import { signInAction } from '@/app/actions';
-import GoogleSignInButton from '@/components/GoogleSignInButton';
+// import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Siren } from 'lucide-react';
 
@@ -23,7 +23,8 @@ export default function Login({
       )}
 
       <form action={signInAction} className="">
-        <GoogleSignInButton />
+        <p>Coming soon...</p>
+        {/* <GoogleSignInButton /> */}
       </form>
     </div>
   );

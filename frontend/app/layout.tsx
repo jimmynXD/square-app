@@ -13,8 +13,8 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: 'Squares App',
-  description: 'Build a squares app with Next.js and Supabase',
+  title: 'SquareLord',
+  description: 'Create, Share, and Track Your Sports Squares',
 };
 
 export default function RootLayout({
@@ -38,16 +38,25 @@ export default function RootLayout({
                   <div className="flex gap-5 items-center font-semibold">
                     <Link href={'/'}>SquareLord</Link>
                   </div>
-                  <div className="flex gap-5 items-center">
-                    <ThemeSwitcher />
-                    <HeaderAuth />
-                  </div>
+                  <HeaderAuth />
                 </div>
               </nav>
               <div className="flex flex-col flex-grow w-full">{children}</div>
 
-              <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
+              <footer className="w-full flex flex-col md:flex-row items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
                 <ThemeSwitcher />
+                <Link
+                  href="/privacy-policy"
+                  className="text-primary/70 hover:text-primary"
+                >
+                  Privacy Policy
+                </Link>
+                <Link
+                  href="/terms-of-service"
+                  className="text-primary/70 hover:text-primary"
+                >
+                  Terms of Service
+                </Link>
               </footer>
             </main>
             <Toaster />
