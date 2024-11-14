@@ -41,7 +41,7 @@ export default async function UserGridPage({
       <GridProvider gridId={params.gridId}>
         <ClientWrapper>
           <Tabs defaultValue="grid" className="space-y-4">
-            <div className="flex justify-between">
+            <div className="flex flex-col md:flex-row justify-center md:justify-between">
               <TabsList>
                 <TabsTrigger value="grid">Grid</TabsTrigger>
                 <TabsTrigger value="players">Players</TabsTrigger>

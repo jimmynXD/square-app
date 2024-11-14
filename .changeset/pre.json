@@ -5,6 +5,7 @@
     "squares-app-monorepo": "0.0.0"
   },
   "changesets": [
-    "fuzzy-rockets-push"
+    "fuzzy-rockets-push",
+    "heavy-dingos-itch"
   ]
 }

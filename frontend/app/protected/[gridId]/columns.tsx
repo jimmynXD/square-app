@@ -88,16 +88,6 @@ export const columns = (lockedAt: string | null): ColumnDef<CellTypes>[] => [
   },
 ];
 
-/**
- * export type WinnerJsonType = {
-  name: string;
-  quarter: number;
-  score: string;
-  x: number;
-  y: number;
-};
-
- */
 export const winnersColumns: ColumnDef<WinnerJsonType>[] = [
   {
     accessorKey: 'name',
@@ -114,10 +104,10 @@ export const winnersColumns: ColumnDef<WinnerJsonType>[] = [
   },
   {
     accessorKey: 'y',
-    header: 'Row',
+    header: 'Row Score',
   },
   {
     accessorKey: 'x',
-    header: 'Column',
+    header: 'Column Score',
   },
 ];

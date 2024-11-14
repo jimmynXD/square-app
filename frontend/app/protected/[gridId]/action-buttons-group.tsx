@@ -1,6 +1,5 @@
 'use client';
 
-import { useMediaQuery } from '@/hooks/use-media-query';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,28 +26,29 @@ import { useGridContext } from '@/context/GridContext';
 import AddPlayersForm from './add-players-form';
 import Link from 'next/link';
 import { ExternalLinkIcon } from 'lucide-react';
+import { DialogClose } from '@radix-ui/react-dialog';
 
 export default function ActionButtonGroup() {
   const [open, setOpen] = useState<boolean>(false);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  //   const isDesktop = useMediaQuery('(min-width: 768px)');
   const { gridInfo } = useGridContext();
 
-  const Desktop = () => {
-    return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button variant="default">Add Players</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add Players</DialogTitle>
-            <DialogDescription>Add players to the square(s).</DialogDescription>
-          </DialogHeader>
-          <AddPlayersForm setOpen={setOpen} />
-        </DialogContent>
-      </Dialog>
-    );
-  };
+  //   const Desktop = () => {
+  //     return (
+  //       <Dialog open={open} onOpenChange={setOpen}>
+  //         <DialogTrigger asChild>
+  //           <Button variant="default">Add Players</Button>
+  //         </DialogTrigger>
+  //         <DialogContent className="sm:max-w-[425px]">
+  //           <DialogHeader>
+  //             <DialogTitle>Add Players</DialogTitle>
+  //             <DialogDescription>Add players to the square(s).</DialogDescription>
+  //           </DialogHeader>
+  //           <AddPlayersForm setOpen={setOpen} />
+  //         </DialogContent>
+  //       </Dialog>
+  //     );
+  //   };
 
   const Mobile = () => {
     return (
@@ -73,14 +73,15 @@ export default function ActionButtonGroup() {
   };
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col md:flex-row pt-4 md:pt-0 gap-4">
       {!gridInfo.locked_at && (
         <>
-          {isDesktop ? <Desktop /> : <Mobile />}
+          {/* {isDesktop ? <Desktop /> : <Mobile />} */}
+          <Mobile />
           <LockSquaresButton />
         </>
       )}
-      <Button asChild variant="ghost">
+      <Button className="hidden md:inline-flex" asChild variant="ghost">
         <Link href={`/${gridInfo.uuid}`} target="_blank">
           <ExternalLinkIcon className="w-4 h-4" />
         </Link>
@@ -112,10 +113,13 @@ export function LockSquaresButton() {
             and you will not be able to edit them.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex justify-end mt-4">
+        <DialogFooter className="flex-col space-y-4 md:space-y-0 justify-end mt-4">
           <Button variant="destructive" onClick={_handleLockGrid}>
             Confirm
           </Button>
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

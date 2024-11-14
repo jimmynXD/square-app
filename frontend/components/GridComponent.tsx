@@ -2,6 +2,7 @@ import { GridAPI } from '@/queries/grid.api';
 import { CellTypes, WinnerJsonType, WinnerTypes } from '@/utils/types';
 import { QueryData } from '@supabase/supabase-js';
 import clsx from 'clsx';
+import { ArrowRight } from 'lucide-react';
 
 interface GridComponentProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,18 +18,16 @@ export default function GridComponent({
 }: GridComponentProps) {
   if (!gridInfo || !cellsData) return null;
   const winners = (winnersData?.winners as WinnerJsonType[]) || [];
-  const gameTime = new Date(gridInfo.nfl_schedule?.date || '');
-  const currentTime = new Date();
-  const gameStarted = currentTime >= gameTime;
 
   return (
     <div className="relative">
-      <div className="text-center text-2xl font-bold">
+      <div className="text-xl font-bold flex items-center gap-2">
         {gridInfo.nfl_schedule?.away_team?.name}
+        <ArrowRight className="w-4 h-4" />
       </div>
-
-      <div className="text-2xl font-bold absolute top-1/2 left-3 -translate-x-1/2 origin-top-left -rotate-90">
+      <div className="text-xl font-bold absolute top-0 pl-8 rounded-full rotate-90 origin-bottom-left -left-8 flex items-center gap-2">
         {gridInfo.nfl_schedule?.home_team?.name}
+        <ArrowRight className="w-4 h-4" />
       </div>
       <table className="w-full table-fixed border-collapse border-spacing-0">
         <thead>
@@ -41,9 +40,8 @@ export default function GridComponent({
                   'border text-secondary-foreground bg-secondary'
                 )}
               >
-                {gameStarted ||
-                (gridInfo.locked_at &&
-                  new Date(gridInfo.locked_at).getTime() > 0)
+                {gridInfo.locked_at &&
+                new Date(gridInfo.locked_at).getTime() > 0
                   ? cellsData.find((cell) => cell.col_index === colIndex)
                       ?.assigned_col_value
                   : '-'}
@@ -55,9 +53,8 @@ export default function GridComponent({
           {Array.from({ length: gridInfo.num_rows }).map((_, rowIndex) => (
             <tr key={rowIndex}>
               <th className="bg-secondary text-secondary-foreground border">
-                {gameStarted ||
-                (gridInfo.locked_at &&
-                  new Date(gridInfo.locked_at).getTime() > 0)
+                {gridInfo.locked_at &&
+                new Date(gridInfo.locked_at).getTime() > 0
                   ? cellsData.find((cell) => cell.row_index === rowIndex)
                       ?.assigned_row_value
                   : '-'}
