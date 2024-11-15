@@ -1,4 +1,5 @@
 import { signInAction } from '@/app/actions';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 // import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Siren } from 'lucide-react';
@@ -23,8 +24,8 @@ export default function Login({
       )}
 
       <form action={signInAction} className="">
-        <p>Coming soon...</p>
-        {/* <GoogleSignInButton /> */}
+        {/* show button if in dev mode */}
+        {process.env.NODE_ENV === 'development' && <GoogleSignInButton />}
       </form>
     </div>
   );
