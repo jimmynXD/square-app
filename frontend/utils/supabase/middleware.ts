@@ -35,7 +35,7 @@ export async function updateSession(request: NextRequest) {
 
   const { error } = await supabase.auth.getUser();
 
-  if (error && request.nextUrl.pathname.startsWith('/protected')) {
+  if (error && request.nextUrl.pathname.startsWith('/dashboard')) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = '/sign-in';
@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
   if (!error && request.nextUrl.pathname === '/') {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
-    url.pathname = '/protected';
+    url.pathname = '/dashboard';
     return NextResponse.redirect(url);
   }
 

@@ -1,5 +1,11 @@
 # squares-app-monorepo
 
+## 0.0.1-beta.2
+
+### Patch Changes
+
+- added logo and changed protected to dashboard
+
 ## 0.0.1-beta.1
 
 ### Patch Changes

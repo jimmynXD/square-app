@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useGridContext } from '@/context/GridContext';
+import { generateRandomPlayers } from '@/utils/dev-utils';
 
 export default function AddPlayersForm({
   className,
@@ -60,6 +61,11 @@ export default function AddPlayersForm({
     await handleRandomAssign(players);
 
     setOpen(false);
+  };
+
+  const handleFillRandom = () => {
+    const randomPlayers = generateRandomPlayers(numEmptyCells);
+    setPlayers(randomPlayers);
   };
 
   return (
@@ -119,6 +125,16 @@ export default function AddPlayersForm({
         </div>
       ))}
       <div>Free cells: {numEmptyCells}</div>
+      {process.env.NODE_ENV === 'development' && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleFillRandom}
+          className="bg-yellow-500"
+        >
+          Fill Random (Dev)
+        </Button>
+      )}
       <Button
         type="submit"
         disabled={
