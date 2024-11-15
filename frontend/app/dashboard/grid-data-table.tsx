@@ -225,7 +225,7 @@ export default function GridDataTable() {
                   </Link>
                 </Button>
                 <Button variant={'ghost'}>
-                  <Link href={`/protected/${grid.uuid}`}>
+                  <Link href={`/dashboard/${grid.uuid}`}>
                     <SettingsIcon className="w-4 h-4" />
                   </Link>
                 </Button>

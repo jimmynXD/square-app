@@ -96,7 +96,7 @@ export default function CreateGridSheet() {
     setLoading(true); // Set loading to true when form is submitted
     refetch();
 
-    router.push(`/protected/${newGridId}`);
+    router.push(`/dashboard/${newGridId}`);
   };
 
   const handleEventChange = useCallback((value: string) => {
