@@ -1,5 +1,11 @@
 # squares-app-monorepo
 
+## 0.0.1-beta.3
+
+### Patch Changes
+
+- login, sign in and up, forgot and reset pw flow
+
 ## 0.0.1-beta.2
 
 ### Patch Changes
