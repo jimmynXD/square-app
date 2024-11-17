@@ -87,7 +87,7 @@ export default function GridComponent({
                     )}
                   >
                     {gridInfo.locked_at && anyWinner && (
-                      <div className="absolute top-0 left-0 bg-green-300/80 border border-green-400 h-4 text-xs text-center rounded rounded-tl-none px-1">
+                      <div className="absolute top-0 left-0 bg-green-300/80 border border-green-400 dark:text-black h-4 text-xs text-center rounded rounded-tl-none px-1">
                         {winnerIndices.join(', ')}
                       </div>
                     )}

@@ -1,5 +1,11 @@
 # squares-app-monorepo
 
+## 0.0.1-beta.4
+
+### Patch Changes
+
+- seo optimizing and new homepage
+
 ## 0.0.1-beta.3
 
 ### Patch Changes

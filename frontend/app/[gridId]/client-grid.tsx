@@ -2,13 +2,18 @@
 
 import GridComponent from '@/components/GridComponent';
 import Scoreboard from '@/components/Scoreboard';
+import { cn } from '@/lib/utils';
 import { GridAPI } from '@/queries/grid.api';
 import useSupabaseBrowser from '@/utils/supabase/client';
 import { WinnerTypes } from '@/utils/types';
 import { useQuery } from '@supabase-cache-helpers/postgrest-react-query';
 import { useEffect, useState } from 'react';
 
-export default function ClientGrid({ gridId }: { gridId: string }) {
+export type ClientGridProps = {
+  gridId: string;
+  className?: string;
+};
+export default function ClientGrid({ gridId, className }: ClientGridProps) {
   const supabase = useSupabaseBrowser();
   const [winners, setWinners] = useState<WinnerTypes | null>(null);
 
@@ -44,7 +49,9 @@ export default function ClientGrid({ gridId }: { gridId: string }) {
   if (!gridInfo || !cellsData) return null;
 
   return (
-    <div className="flex-1 space-y-4 xl:max-w-7xl xl:mx-auto p-8">
+    <div
+      className={cn('flex-1 space-y-4 xl:max-w-7xl xl:mx-auto p-8', className)}
+    >
       <Scoreboard gridInfo={gridInfo} />
       <GridComponent
         gridInfo={gridInfo}

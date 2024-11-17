@@ -31,7 +31,7 @@ export default async function GridPage({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ClientGrid gridId={params.gridId} />
+      <ClientGrid className="pt-24" gridId={params.gridId} />
     </HydrationBoundary>
   );
 }

@@ -1,5 +1,5 @@
 'use client';
-import { signInWithEmailAction } from '@/app/actions';
+import { signInWithEmailAction, signInWithGoogleAction } from '@/app/actions';
 import { Message } from '@/components/form-message';
 import { Input, ClientInputPassword } from '@/components/ui/input';
 
@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
+import { GoogleSignInStandaloneButton } from '@/components/GoogleSignInButton';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -101,6 +102,15 @@ export default function SignInPage({
             Submit
           </Button>
         </form>
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4">
+            <GoogleSignInStandaloneButton
+              onClick={async () => await signInWithGoogleAction()}
+            >
+              Continue with Google
+            </GoogleSignInStandaloneButton>
+          </div>
+        )}
       </Form>
     </AuthForm>
   );
