@@ -5,9 +5,11 @@
     "squares-app-monorepo": "0.0.0"
   },
   "changesets": [
+    "angry-humans-grin",
     "dry-badgers-sparkle",
     "fuzzy-rockets-push",
     "heavy-dingos-itch",
-    "moody-cats-pump"
+    "moody-cats-pump",
+    "wet-wolves-boil"
   ]
 }

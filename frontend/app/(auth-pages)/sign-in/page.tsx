@@ -57,6 +57,7 @@ export default function SignInPage({
         </>
       }
       message={searchParams}
+      googleSignIn
     >
       <Form {...form}>
         <form

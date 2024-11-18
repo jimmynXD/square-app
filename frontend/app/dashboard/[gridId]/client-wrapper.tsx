@@ -19,7 +19,7 @@ export default function ClientWrapper({
   const { gridInfo } = useGridContext();
 
   return (
-    <div className="container mx-auto p-8 space-y-4">
+    <div className="flex flex-col flex-grow mx-auto pt-20 w-full pb-8 px-8 space-y-4">
       <div>
         <Breadcrumb>
           <BreadcrumbList>

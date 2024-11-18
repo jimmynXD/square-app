@@ -1,6 +1,6 @@
 {
   "name": "squares-app-monorepo",
-  "version": "0.0.1-beta.3",
+  "version": "0.0.1-beta.5",
   "private": true,
   "scripts": {
     "prepare": "husky",
