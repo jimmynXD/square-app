@@ -1,5 +1,11 @@
 # squares-app-monorepo
 
+## 0.0.1-beta.5
+
+### Patch Changes
+
+- seo and google login
+
 ## 0.0.1-beta.4
 
 ### Patch Changes
