@@ -87,6 +87,7 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
         </>
       }
       message={searchParams}
+      googleSignIn
     >
       <Form {...form}>
         <form
