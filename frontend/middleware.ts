@@ -1,7 +1,14 @@
 import { type NextRequest } from 'next/server';
 import { updateSession } from '@/utils/supabase/middleware';
+import { NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  // Allow search engine crawlers
+  const userAgent = request.headers.get('user-agent') || '';
+  if (userAgent.toLowerCase().includes('bot')) {
+    return NextResponse.next();
+  }
+
   return await updateSession(request);
 }
 

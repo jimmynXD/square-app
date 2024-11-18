@@ -7,6 +7,7 @@ import './globals.css';
 import { ReactQueryClientProvider } from '@/components/ReactQueryClientProvider';
 import { Toaster } from '@/components/ui/toaster';
 import Image from 'next/image';
+import StructuredData from './components/StructuredData';
 
 const defaultUrl =
   process.env.NODE_ENV === 'production'
@@ -15,11 +16,15 @@ const defaultUrl =
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: 'SquareLord - Create, Share, and Track Your Sports Squares',
+  title:
+    'Super Bowl Squares, NFL Football Pools, NBA Basketball Pools | SquareLord - Sports Squares',
   description:
-    'Create custom sports squares pools, share with participants, and track real-time winners. The easiest way to manage your sports betting squares.',
+    'Create and manage Super Bowl squares, NFL football pools, and sports betting squares. Real-time score tracking, automatic winner calculation, and easy sharing with participants.',
   keywords:
-    'sports squares, betting squares, football squares, super bowl squares, sports pools',
+    'super bowl squares, football squares, basketball squares, nfl squares, nba squares, sports betting squares, football pools, super bowl pools, sports squares',
+  type: 'website',
+  url: defaultUrl,
+  siteName: 'SquareLord',
   openGraph: {
     title: 'SquareLord - Sports Squares Platform',
     description:
@@ -30,9 +35,9 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SquareLord - Sports Squares Platform',
+    title: 'Super Bowl Squares & NFL Football Pools | SquareLord',
     description:
-      'Create custom sports squares pools, share with participants, and track real-time winners.',
+      'Create and share sports betting squares for Super Bowl, NFL games, and more. Automatic winner tracking and real-time score updates.',
   },
   robots: {
     index: true,
@@ -47,6 +52,20 @@ export const metadata = {
   },
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
+function MetaTags() {
+  return (
+    <>
+      <meta name="robots" content="index,follow" />
+      <meta name="googlebot" content="index,follow" />
+    </>
+  );
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -55,6 +74,9 @@ export default function RootLayout({
   return (
     <ReactQueryClientProvider>
       <html lang="en" className={GeistSans.className} suppressHydrationWarning>
+        <head>
+          <StructuredData />
+        </head>
         <body className="bg-background text-foreground">
           <ThemeProvider
             attribute="class"
@@ -81,6 +103,8 @@ export default function RootLayout({
                 </div>
               </nav>
 
+              <MetaTags />
+
               {children}
 
               <footer className="w-full flex flex-col md:flex-row items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
@@ -97,6 +121,12 @@ export default function RootLayout({
                 >
                   Terms of Service
                 </Link>
+                <a
+                  href="mailto:info@squarelord.com"
+                  className="text-primary/70 hover:text-primary"
+                >
+                  Send Feedback Questions or Report an Issue
+                </a>
               </footer>
             </main>
             <Toaster />
